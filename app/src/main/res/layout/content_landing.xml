@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="marmu.com.quicksaleclient.activity.LandingActivity"
+    tools:showIn="@layout/app_bar_landing">
+
+    <include
+        android:id="@+id/taken_holder"
+        layout="@layout/view_taken"
+        android:visibility="gone" />
+
+    <include
+        android:id="@+id/order_holder"
+        layout="@layout/view_order"
+        android:visibility="gone" />
+
+    <include
+        android:id="@+id/billing_holder"
+        layout="@layout/view_billing"
+        android:visibility="gone" />
+
+    <!--Resources-->
+    <include
+        android:id="@+id/setup_holder"
+        layout="@layout/view_setup"
+        android:visibility="gone" />
+
+</android.support.constraint.ConstraintLayout>

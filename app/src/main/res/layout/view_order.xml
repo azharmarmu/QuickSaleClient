@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="@dimen/activity_horizontal_margin">
+
+    <TextView
+        android:id="@+id/no_view"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="@dimen/activity_horizontal_margin"
+        android:text="No Order"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        android:textColor="@color/colorLightBlack"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/btn_create_order"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/activity_horizontal_margin"
+        android:background="@drawable/box_white_thick_border_corner_ripple"
+        android:gravity="center"
+        android:padding="16dp"
+        android:text="Create Order"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+        app:layout_constraintBottom_toTopOf="@+id/view"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <View
+        android:id="@+id/view"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="@color/colorAccent"
+        app:layout_constraintBottom_toTopOf="@+id/et_date_picker"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_create_order" />
+
+    <EditText
+        android:id="@+id/et_date_picker"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="@dimen/activity_horizontal_margin"
+        android:background="@drawable/box_white_thick_border_corner_ripple"
+        android:ems="10"
+        android:hint="@string/date"
+        android:inputType="date"
+        android:padding="16dp"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+        android:textColor="@color/colorLightBlack"
+        app:layout_constraintBottom_toTopOf="@+id/rv_orders"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/view" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rv_orders"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/activity_horizontal_margin"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/et_date_picker" />
+
+</android.support.constraint.ConstraintLayout>

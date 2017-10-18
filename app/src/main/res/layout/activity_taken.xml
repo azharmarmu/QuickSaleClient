@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:orientation="vertical"
+    tools:context="marmu.com.quicksaleclient.activity.TakenActivity">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/box_white_thick_border_corner_ripple"
+        android:gravity="center"
+        android:onClick="purchaseClick"
+        android:padding="16dp"
+        android:text="Sell"
+        android:textColor="@color/colorBlack"
+        android:textSize="20sp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/box_white_thick_border_corner_ripple"
+        android:gravity="center"
+        android:onClick="billingClick"
+        android:padding="16dp"
+        android:text="Billing"
+        android:textColor="@color/colorBlack"
+        android:textSize="20sp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/box_white_thick_border_corner_ripple"
+        android:gravity="center"
+        android:onClick="viewStockClick"
+        android:padding="16dp"
+        android:text="View Stock"
+        android:textColor="@color/colorBlack"
+        android:textSize="20sp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/box_white_thick_border_corner_ripple"
+        android:gravity="center"
+        android:onClick="closeClick"
+        android:padding="16dp"
+        android:text="Close"
+        android:textColor="@color/colorBlack"
+        android:textSize="20sp" />
+
+</LinearLayout>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/sales_man_details"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    android:background="@drawable/box_white">
+
+    <TextView
+        android:id="@+id/sales_man_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:padding="16dp"
+        android:text="Name"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+        android:textColor="@color/colorBlack" />
+
+    <TextView
+        android:id="@+id/sales_man_edit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_toStartOf="@+id/sales_man_delete"
+        android:background="@drawable/box_white"
+        android:padding="8dp"
+        android:text="Edit"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium" />
+
+    <TextView
+        android:id="@+id/sales_man_delete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:background="@drawable/box_white"
+        android:padding="8dp"
+        android:text="Delete"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium" />
+
+</RelativeLayout>

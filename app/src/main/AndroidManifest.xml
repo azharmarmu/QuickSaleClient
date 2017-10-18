@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="marmu.com.quicksaleclient">
+
+    <supports-screens android:anyDensity="true" />
+
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <application
+        android:name=".MyApplication"
+        android:allowBackup="true"
+        android:fullBackupContent="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme.NoActionBar">
+        <activity
+            android:name=".activity.SplashActivity"
+            android:theme="@style/SplashScreenTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".activity.LoginActivity"
+            android:windowSoftInputMode="stateHidden" />
+        <activity
+            android:name=".activity.LandingActivity"
+            android:windowSoftInputMode="stateHidden" />
+        <activity
+            android:name=".activity.TakenActivity"
+            android:windowSoftInputMode="stateHidden" />
+        <activity
+            android:name=".activity.ViewStockActivity"
+            android:windowSoftInputMode="stateHidden" />
+        <activity
+            android:name=".activity.TakenBillingActivity"
+            android:windowSoftInputMode="stateHidden" />
+        <activity
+            android:name=".activity.TakenSellActivity"
+            android:windowSoftInputMode="stateHidden" />
+        <activity
+            android:name=".activity.CreateOrderActivity"
+            android:windowSoftInputMode="stateHidden" />
+        <activity
+            android:name=".activity.SalesManActivity"
+            android:windowSoftInputMode="stateHidden" />
+        <activity
+            android:name=".activity.DeviceListActivity"
+            android:label="Bluetooth Devices" />
+
+        <receiver
+            android:name=".sms.SMSReceiver"
+            android:permission="android.permission.BROADCAST_SMS">
+            <intent-filter>
+                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
+            </intent-filter>
+        </receiver>
+
+        <activity
+            android:name=".activity.PrintActivity"
+            android:windowSoftInputMode="stateHidden" />
+    </application>
+
+</manifest>

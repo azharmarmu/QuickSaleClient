@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="@dimen/activity_horizontal_margin">
+
+    <LinearLayout
+        android:id="@+id/view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/colorPrimary">
+
+            <TextView
+                android:layout_weight="1"
+                android:gravity="center"
+                android:padding="16dp"
+                android:text="Product"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
+                android:textColor="@color/colorWhite" />
+
+            <TextView
+                android:layout_weight="1"
+                android:gravity="center"
+                android:padding="16dp"
+                android:text="Rate"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
+                android:textColor="@color/colorWhite" />
+
+        </TableRow>
+
+        <TableLayout
+            android:id="@+id/table_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+</ScrollView>

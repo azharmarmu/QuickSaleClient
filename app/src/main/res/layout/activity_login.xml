@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="marmu.com.quicksaleclient.activity.LoginActivity">
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="175dp"
+        android:contentDescription="@string/app_name"
+        android:src="@drawable/logo"
+        app:srcCompat="@drawable/logo" />
+
+
+    <EditText
+        android:id="@+id/et_sales_man_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginStart="20dp"
+        android:background="@drawable/box_white_thick_border_corner_ripple"
+        android:hint="Name"
+        android:inputType="text"
+        android:padding="16dp"
+        tools:ignore="LabelFor" />
+
+    <EditText
+        android:id="@+id/et_sales_man_phone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="20dp"
+        android:layout_marginStart="20dp"
+        android:background="@drawable/box_white_thick_border_corner_ripple"
+        android:hint="Mobile Number"
+        android:inputType="phone"
+        android:maxLength="10"
+        android:minEms="10"
+        android:padding="16dp"
+        tools:ignore="LabelFor" />
+
+    <EditText
+        android:id="@+id/et_sales_man_otp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="20dp"
+        android:layout_marginStart="20dp"
+        android:background="@drawable/box_white_thick_border_corner_ripple"
+        android:hint="OTP"
+        android:inputType="number"
+        android:maxLength="10"
+        android:minEms="10"
+        android:padding="16dp"
+        android:visibility="gone"
+        tools:ignore="LabelFor" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:background="@drawable/box_primary"
+        android:gravity="center"
+        android:onClick="login"
+        android:padding="16dp"
+        android:text="Login"
+        android:textColor="@color/colorWhite"
+        android:textSize="25sp" />
+
+</LinearLayout>
