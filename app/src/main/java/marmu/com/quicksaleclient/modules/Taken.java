@@ -74,28 +74,28 @@ public class Taken {
         FireBaseAPI.takenDBRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.getValue() != null) {
-                    FireBaseAPI.taken = (HashMap<String, Object>) dataSnapshot.getValue();
-                    HashMap<String, Object> taken = FireBaseAPI.taken;
-                    takenList = new ArrayList<>();
-                    if (taken != null) {
-                        for (String key : taken.keySet()) {
-                            HashMap<String, Object> takenOrder = (HashMap<String, Object>) taken.get(key);
-                            SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
-                            try {
+                try {
+                    if (dataSnapshot.getValue() != null) {
+                        FireBaseAPI.taken = (HashMap<String, Object>) dataSnapshot.getValue();
+                        HashMap<String, Object> taken = FireBaseAPI.taken;
+                        takenList = new ArrayList<>();
+                        if (taken != null) {
+                            for (String key : taken.keySet()) {
+                                HashMap<String, Object> takenOrder = (HashMap<String, Object>) taken.get(key);
+                                SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+
                                 Date salesDate = formatter.parse(takenOrder.get("sales_date").toString());
                                 if (pickedDate.compareTo(salesDate) == 0) {
                                     takenList.add(new TakenModel(key, takenOrder));
                                 }
-                            } catch (ParseException e) {
-                                e.printStackTrace();
                             }
-
                         }
+                        populateTaken(context, itemView);
+                    } else {
+                        FireBaseAPI.taken.clear();
                     }
-                    populateTaken(context, itemView);
-                } else {
-                    FireBaseAPI.taken.clear();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
 
@@ -141,7 +141,7 @@ public class Taken {
                                         if ((monthOfYear + 1) <= 9) {
                                             datePicker.setText(dayOfMonth + "/0" + (monthOfYear + 1) + "/" + year);
                                         } else {
-                                            datePicker.setText(dayOfMonth + "/" +(monthOfYear + 1) + "/" + year);
+                                            datePicker.setText(dayOfMonth + "/" + (monthOfYear + 1) + "/" + year);
                                         }
                                         datePicker.clearFocus();
                                         changeMapToList(context, itemView, pickedDate);

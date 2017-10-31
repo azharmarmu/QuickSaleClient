@@ -1,9 +1,14 @@
 package marmu.com.quicksaleclient.activity;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
+
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
 
@@ -54,7 +59,25 @@ public class TakenActivity extends AppCompatActivity {
     }
 
     public void closeClick(View view) {
-        FireBaseAPI.takenDBRef.child(key).child("process").setValue("close");
+        FireBaseAPI.takenDBRef.child(key).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                try {
+                    if (dataSnapshot.getValue() != null) {
+                        HashMap<String, Object> taken = (HashMap<String, Object>) dataSnapshot.getValue();
+                        taken.put("process", "close");
+                        FireBaseAPI.takenDBRef.child(key).updateChildren(taken);
+                    }
+                } catch (Exception e) {
+                    Log.e("Error", e.getMessage());
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.e("Error", databaseError.getMessage());
+            }
+        });
         finish();
     }
 }

@@ -23,6 +23,7 @@ import marmu.com.quicksaleclient.model.TakenModel;
  * Created by azharuddin on 24/7/17.
  */
 
+@SuppressWarnings("unchecked")
 public class TakenAdapter extends RecyclerView.Adapter<TakenAdapter.MyViewHolder> {
 
     private Context context;
@@ -77,7 +78,7 @@ public class TakenAdapter extends RecyclerView.Adapter<TakenAdapter.MyViewHolder
         holder.takenClose.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // close the taken in DB
+                FireBaseAPI.takenDBRef.child(taken.getKey()).child("process").setValue("close");
             }
         });
 

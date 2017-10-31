@@ -8,6 +8,9 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -16,6 +19,7 @@ import android.widget.Toast;
 
 import java.io.Serializable;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -32,7 +36,8 @@ public class CreateOrderActivity extends AppCompatActivity implements Serializab
     HashMap<String, Object> itemDetails = new HashMap<>();
 
     TextView salesManListView;
-    EditText customerName, customerGst, customerAddress;
+    EditText customerGst, customerAddress;
+    AutoCompleteTextView customerName;
     TableLayout tableLayout;
     List<String> salesMan;
 
@@ -42,11 +47,37 @@ public class CreateOrderActivity extends AppCompatActivity implements Serializab
         setContentView(R.layout.activity_create_order);
 
         salesManListView = (TextView) findViewById(R.id.sales_man_list);
-        customerName = (EditText) findViewById(R.id.et_customer_name);
+        customerName = (AutoCompleteTextView) findViewById(R.id.et_customer_name);
         customerGst = (EditText) findViewById(R.id.et_customer_gst);
         customerAddress = (EditText) findViewById(R.id.et_customer_address);
         tableLayout = (TableLayout) findViewById(R.id.table_layout);
         isOrderEdit(getIntent().getExtras());
+        getCustomerDetails();
+    }
+
+    private void getCustomerDetails() {
+        final List<String> custName = new ArrayList<>();
+        final List<String> custGST = new ArrayList<>();
+        final List<String> custAddress = new ArrayList<>();
+        HashMap<String, Object> customer = FireBaseAPI.customer;
+        if (customer.size() > 0) {
+            for (String key : customer.keySet()) {
+                HashMap<String, Object> customerDetails = (HashMap<String, Object>) customer.get(key);
+                custName.add(customerDetails.get("customer_name").toString());
+                custGST.add(customerDetails.get("customer_gst").toString());
+                custAddress.add(customerDetails.get("customer_address").toString());
+            }
+        }
+        ArrayAdapter<List<String>> adapter =
+                new ArrayAdapter(this, android.R.layout.select_dialog_item, custName);
+        customerName.setAdapter(adapter);
+        customerName.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+                customerGst.setText(custGST.get(position));
+                customerAddress.setText(custAddress.get(position));
+            }
+        });
     }
 
     private void isOrderEdit(Bundle extras) {
@@ -191,9 +222,9 @@ public class CreateOrderActivity extends AppCompatActivity implements Serializab
             orders.put("order_date", Constants.currentDate());
             orders.put("sales_man_name", salesMan);
             orders.put("customer_name", localCustomerName);
-                if (!localCustomerGst.isEmpty()) {
-                    orders.put("customer_gst", localCustomerGst);
-                }
+            if (!localCustomerGst.isEmpty()) {
+                orders.put("customer_gst", localCustomerGst);
+            }
             orders.put("customer_address", localCustomerAddress);
             orders.put("sales_order_qty", orderItems);
             orders.put("sales_order_qty_left", orderItems);

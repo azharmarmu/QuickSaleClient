@@ -11,6 +11,8 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -42,8 +44,8 @@ public class TakenSellActivity extends AppCompatActivity {
     HashMap<String, Object> itemDetails = new HashMap<>();
 
     TextView salesManListView, totalView;
-    EditText customerName, customerGst, customerAddress;
-
+    EditText customerGst, customerAddress;
+    AutoCompleteTextView customerName;
     TableLayout tableLayout;
     List<String> salesMan = new ArrayList<>();
     List<Integer> billNo = new ArrayList<>();
@@ -70,11 +72,16 @@ public class TakenSellActivity extends AppCompatActivity {
 
 
         salesManListView = (TextView) findViewById(R.id.sales_man_list);
-        customerName = (EditText) findViewById(R.id.et_customer_name);
+        customerName = (AutoCompleteTextView) findViewById(R.id.et_customer_name);
         customerGst = (EditText) findViewById(R.id.et_customer_gst);
         customerAddress = (EditText) findViewById(R.id.et_customer_address);
         tableLayout = (TableLayout) findViewById(R.id.table_layout);
         totalView = (TextView) findViewById(R.id.tv_sell_total);
+
+        String[] countries = {"Azhar","sudha"};
+        ArrayAdapter<String> adapter =
+                new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, countries);
+        customerName.setAdapter(adapter);
 
         FireBaseAPI.productDBRef.addValueEventListener(new ValueEventListener() {
             @Override
@@ -93,6 +100,10 @@ public class TakenSellActivity extends AppCompatActivity {
                 Log.e("FireError", databaseError.getMessage());
             }
         });
+    }
+
+    private void performSearch() {
+        //// TODO: 18/10/17  
     }
 
     private void populateSalesMan() {

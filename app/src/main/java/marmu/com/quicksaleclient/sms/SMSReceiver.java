@@ -18,6 +18,7 @@ public class SMSReceiver extends BroadcastReceiver {
         Bundle myBundle = intent.getExtras();
         SmsMessage[] messages;
 
+
         if (myBundle != null) {
             Object[] pdus = (Object[]) myBundle.get("pdus");
             assert pdus != null;
