@@ -1,35 +1,27 @@
 {
   "project_info": {
-    "project_number": "653351287706",
-    "firebase_url": "https://handprintz-4fcf4.firebaseio.com",
-    "project_id": "handprintz-4fcf4",
-    "storage_bucket": "handprintz-4fcf4.appspot.com"
+    "project_number": "835006720991",
+    "firebase_url": "https://quicksaledev.firebaseio.com",
+    "project_id": "quicksaledev",
+    "storage_bucket": "quicksaledev.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:653351287706:android:4c168d00f59060f3",
+        "mobilesdk_app_id": "1:835006720991:android:70def98e0022198a",
         "android_client_info": {
-          "package_name": "marmu.com.quicksale"
+          "package_name": "marmu.com.quicksaleclient"
         }
       },
       "oauth_client": [
         {
-          "client_id": "653351287706-m0klqfm18pqjpsr2255ssuat48lk7lbq.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "marmu.com.quicksale",
-            "certificate_hash": "dc737a85bc3a15b554f8f9ea989957e30086d0d7"
-          }
-        },
-        {
-          "client_id": "653351287706-r05u0ata2l6j0db4m9m3j8ng5f3kk2hc.apps.googleusercontent.com",
+          "client_id": "835006720991-l4v7k33vd7rptanqgburdjp6kt6v71fb.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyDYGZHOvu2Lgwd-pyoHlmLPt5-csqKoFDg"
+          "current_key": "AIzaSyCJL8bkryKkp3cEAQVojxeP4R-H1D-Lh4c"
         }
       ],
       "services": {
@@ -37,13 +29,8 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 2,
-          "other_platform_oauth_client": [
-            {
-              "client_id": "653351287706-r05u0ata2l6j0db4m9m3j8ng5f3kk2hc.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "status": 1,
+          "other_platform_oauth_client": []
         },
         "ads_service": {
           "status": 2
@@ -52,28 +39,20 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:653351287706:android:70def98e0022198a",
+        "mobilesdk_app_id": "1:835006720991:android:4c168d00f59060f3",
         "android_client_info": {
-          "package_name": "marmu.com.quicksaleclient"
+          "package_name": "marmu.com.quicksale"
         }
       },
       "oauth_client": [
         {
-          "client_id": "653351287706-rpjfsf5l20rjvt890m50ucv2volnc8kj.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "marmu.com.quicksaleclient",
-            "certificate_hash": "dc737a85bc3a15b554f8f9ea989957e30086d0d7"
-          }
-        },
-        {
-          "client_id": "653351287706-r05u0ata2l6j0db4m9m3j8ng5f3kk2hc.apps.googleusercontent.com",
+          "client_id": "835006720991-l4v7k33vd7rptanqgburdjp6kt6v71fb.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyDYGZHOvu2Lgwd-pyoHlmLPt5-csqKoFDg"
+          "current_key": "AIzaSyCJL8bkryKkp3cEAQVojxeP4R-H1D-Lh4c"
         }
       ],
       "services": {
@@ -81,13 +60,8 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 2,
-          "other_platform_oauth_client": [
-            {
-              "client_id": "653351287706-r05u0ata2l6j0db4m9m3j8ng5f3kk2hc.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "status": 1,
+          "other_platform_oauth_client": []
         },
         "ads_service": {
           "status": 2
