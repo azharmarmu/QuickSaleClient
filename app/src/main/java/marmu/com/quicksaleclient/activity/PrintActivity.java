@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.util.TypedValue;
@@ -28,9 +29,12 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.mocoo.hang.rtprinter.driver.Contants;
 import com.mocoo.hang.rtprinter.driver.HsBluetoothPrintDriver;
 
@@ -314,16 +318,30 @@ public class PrintActivity extends AppCompatActivity {
     }
 
     public void amountReceived(View view) {
-        EditText etAmountReceived = (EditText) findViewById(R.id.et_amount_received);
+        EditText etAmountReceived = findViewById(R.id.et_amount_received);
         int amountReceived;
         if (etAmountReceived.getText().toString().isEmpty())
             amountReceived = 0;
         else {
             amountReceived = Integer.parseInt(etAmountReceived.getText().toString());
         }
-        FireBaseAPI.billingDBREf.child(key).child(billNumber).child("amount_received").setValue(String.valueOf(amountReceived));
-        Toast.makeText(PrintActivity.this, "Amount added successfully!", Toast.LENGTH_SHORT).show();
-        finish();
+
+        FirebaseFirestore dbStore = FirebaseFirestore.getInstance();
+        dbStore.collection(Constants.SALES_MAN_BILLING)
+                .document(key)
+                .update("amount_received", amountReceived)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            Toast.makeText(PrintActivity.this,
+                                    "Amount added successfully!",
+                                    Toast.LENGTH_SHORT).show();
+                            finish();
+                        }
+                    }
+                });
+
     }
 
     private static class BluetoothHandler extends Handler {

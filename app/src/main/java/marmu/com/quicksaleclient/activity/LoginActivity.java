@@ -60,7 +60,8 @@ public class LoginActivity extends AppCompatActivity {
                 etOTP.setText(messageText);
                 String code = etOTP.getText().toString();
                 etOTP.setSelection(code.length());
-                signInWithPhoneAuthCredential(new PhoneAuthCredential(phoneVerificationID, code), name, phone);
+                PhoneAuthCredential credential = PhoneAuthProvider.getCredential(phoneVerificationID, code);
+                signInWithPhoneAuthCredential(credential, name, phone);
             }
         });
 
@@ -83,7 +84,8 @@ public class LoginActivity extends AppCompatActivity {
 
             if (!otp.equals("")) {
                 DialogUtils.showProgressDialog(LoginActivity.this, "Loading...");
-                signInWithPhoneAuthCredential(new PhoneAuthCredential(phoneVerificationID, otp), name, phone);
+                PhoneAuthCredential credential = PhoneAuthProvider.getCredential(phoneVerificationID, otp);
+                signInWithPhoneAuthCredential(credential, name, phone);
             } else {
                 changeMapToList();
 

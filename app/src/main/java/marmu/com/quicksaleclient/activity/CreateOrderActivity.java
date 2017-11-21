@@ -46,11 +46,11 @@ public class CreateOrderActivity extends AppCompatActivity implements Serializab
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_order);
 
-        salesManListView = (TextView) findViewById(R.id.sales_man_list);
-        customerName = (AutoCompleteTextView) findViewById(R.id.et_customer_name);
-        customerGst = (EditText) findViewById(R.id.et_customer_gst);
-        customerAddress = (EditText) findViewById(R.id.et_customer_address);
-        tableLayout = (TableLayout) findViewById(R.id.table_layout);
+        salesManListView = findViewById(R.id.sales_man_list);
+        customerName = findViewById(R.id.et_customer_name);
+        customerGst = findViewById(R.id.et_customer_gst);
+        customerAddress = findViewById(R.id.et_customer_address);
+        tableLayout = findViewById(R.id.table_layout);
         isOrderEdit(getIntent().getExtras());
         getCustomerDetails();
     }

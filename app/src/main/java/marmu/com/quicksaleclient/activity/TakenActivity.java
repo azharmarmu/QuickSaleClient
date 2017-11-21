@@ -46,8 +46,17 @@ public class TakenActivity extends AppCompatActivity {
         startActivity(takenPurchaseActivity);
     }
 
+    public void purchaseStoreClick(View view) {
+        Intent takenPurchaseActivity = new Intent(TakenActivity.this, TakenSellStoreActivity.class);
+        takenPurchaseActivity.putExtra("key", key);
+        startActivity(takenPurchaseActivity);
+    }
+
     public void billingClick(View view) {
-        Intent takenBillingActivity = new Intent(TakenActivity.this, TakenBillingActivity.class);
+        Intent takenBillingActivity =
+                new Intent(TakenActivity.this, TakenBillingStoreActivity.class);
+        /*Intent takenBillingActivity =
+                new Intent(TakenActivity.this, TakenBillingActivity.class);*/
         takenBillingActivity.putExtra("key", key);
         startActivity(takenBillingActivity);
     }

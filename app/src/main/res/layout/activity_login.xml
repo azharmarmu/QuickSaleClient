@@ -24,7 +24,7 @@
         android:layout_marginStart="20dp"
         android:background="@drawable/box_white_thick_border_corner_ripple"
         android:hint="Name"
-        android:inputType="text"
+        android:inputType="textAutoComplete|textCapCharacters"
         android:padding="16dp"
         tools:ignore="LabelFor" />
 

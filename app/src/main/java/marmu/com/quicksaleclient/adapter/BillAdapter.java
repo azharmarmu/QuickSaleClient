@@ -3,11 +3,17 @@ package marmu.com.quicksaleclient.adapter;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
 import java.util.List;
@@ -16,6 +22,7 @@ import marmu.com.quicksaleclient.R;
 import marmu.com.quicksaleclient.activity.PrintActivity;
 import marmu.com.quicksaleclient.api.FireBaseAPI;
 import marmu.com.quicksaleclient.model.BillModel;
+import marmu.com.quicksaleclient.utils.Constants;
 
 
 /**
@@ -56,7 +63,7 @@ public class BillAdapter extends RecyclerView.Adapter<BillAdapter.MyViewHolder> 
             public void onClick(View view) {
                 //// TODO: 30/9/17  edit has to be done
                 Intent intent = new Intent(context, PrintActivity.class);
-                intent.putExtra("key", billModel.getKey());
+                intent.putExtra("key", billModel.getName());
                 intent.putExtra("bill_no", (String) soldOrders.get("bill_no"));
                 intent.putExtra("sold_orders", soldOrders);
                 context.startActivity(intent);
@@ -66,10 +73,22 @@ public class BillAdapter extends RecyclerView.Adapter<BillAdapter.MyViewHolder> 
         holder.billClose.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                FireBaseAPI.billingDBREf.child(billModel.getKey()).child(billModel.getName()).removeValue();
-                billList.remove(position);
-                re_AddItemsToStock(billModel);
-                notifyDataSetChanged();
+                FirebaseFirestore dbStore = FirebaseFirestore.getInstance();
+                dbStore.collection(Constants.SALES_MAN_BILLING)
+                        .document(billModel.getName())
+                        .delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            Toast.makeText(context,
+                                    "Amount added successfully!",
+                                    Toast.LENGTH_SHORT).show();
+                            billList.remove(position);
+                            re_AddItemsToStock(billModel);
+                            notifyDataSetChanged();
+                        }
+                    }
+                });
             }
         });
     }
@@ -83,8 +102,8 @@ public class BillAdapter extends RecyclerView.Adapter<BillAdapter.MyViewHolder> 
         HashMap<String, Object> qtyLeft = (HashMap<String, Object>) takenMap.get("sales_order_qty_left");
 
         for (String itemKey : itemStock.keySet()) {
-            int itemVal = Integer.parseInt(itemStock.get(itemKey).toString());
-            int qtyVal = Integer.parseInt(qtyLeft.get(itemKey).toString());
+                int itemVal = Integer.parseInt(itemStock.get(itemKey).toString());
+                int qtyVal = Integer.parseInt(qtyLeft.get(itemKey).toString());
 
             orders.put(itemKey, String.valueOf(itemVal + qtyVal));
         }

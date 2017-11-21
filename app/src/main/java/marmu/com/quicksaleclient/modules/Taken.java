@@ -9,7 +9,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.DatePicker;
-import android.widget.EditText;
+import android.widget.TextView;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -42,7 +42,7 @@ public class Taken {
     public static void evaluate(final Context context, View itemView) {
 
         try {
-            final EditText datePicker = itemView.findViewById(R.id.et_date_picker);
+            final TextView datePicker = itemView.findViewById(R.id.et_date_picker);
 
             Date currentDate = new Date();
             Calendar calendar = new GregorianCalendar();
@@ -109,7 +109,7 @@ public class Taken {
 
     @SuppressLint("SimpleDateFormat")
     private static void datePicker(final Context context, final View itemView) {
-        final EditText datePicker = itemView.findViewById(R.id.et_date_picker);
+        final TextView datePicker = itemView.findViewById(R.id.et_date_picker);
 
         datePicker.setOnClickListener(new View.OnClickListener() {
             @Override

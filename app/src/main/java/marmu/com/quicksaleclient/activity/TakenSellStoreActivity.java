@@ -1,9 +1,8 @@
 package marmu.com.quicksaleclient.activity;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.InputType;
@@ -22,9 +21,13 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -37,7 +40,7 @@ import marmu.com.quicksaleclient.utils.Constants;
 import marmu.com.quicksaleclient.utils.Permissions;
 
 @SuppressWarnings({"unchecked", "deprecation"})
-public class TakenSellActivity extends AppCompatActivity {
+public class TakenSellStoreActivity extends AppCompatActivity {
     String key;
     HashMap<String, Object> takenMap = new HashMap<>();
     HashMap<String, Object> sellItems = new HashMap<>();
@@ -128,17 +131,17 @@ public class TakenSellActivity extends AppCompatActivity {
 
     private void populateSalesMan() {
         salesMan = (List<String>) takenMap.get("sales_man_name");
-        String salesManName = "";
+        StringBuilder salesManName = new StringBuilder();
         for (int i = 0; i < salesMan.size(); i++) {
             if (!salesMan.get(i).isEmpty()) {
                 if (i == 0) {
-                    salesManName = salesMan.get(i);
+                    salesManName = new StringBuilder(salesMan.get(i));
                 } else {
-                    salesManName = salesManName + ", " + salesMan.get(i);
+                    salesManName.append(", ").append(salesMan.get(i));
                 }
             }
         }
-        salesManListView.setText(salesManName);
+        salesManListView.setText(salesManName.toString());
     }
 
     private void populateTable() {
@@ -321,108 +324,100 @@ public class TakenSellActivity extends AppCompatActivity {
         totalView.setText(String.valueOf(total));
     }
 
-    public void sellItems(View view) {
-        if (Permissions.EXTERNAL_STORAGE(TakenSellActivity.this)) {
-            final AlertDialog.Builder alertbox = new AlertDialog.Builder(this);
-            alertbox.setMessage("Confirm Sale?");
-            alertbox.setPositiveButton("Ok", new
-                    DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int arg1) {
-                            try {
-                                sales();
-                            } catch (ParseException e) {
-                                e.printStackTrace();
+    public void sellItems(View view) throws ParseException {
+        if (Permissions.EXTERNAL_STORAGE(TakenSellStoreActivity.this)) {
+            String localSalesMan = (String) salesManListView.getText();
+            String localCustomerName = String.valueOf(customerName.getText());
+            String localCustomerGst = String.valueOf(customerGst.getText());
+            String localCustomerAddress = String.valueOf(customerAddress.getText());
+
+            for (int i = 0; i < tableLayout.getChildCount(); i++) {
+                TableRow tableRow = (TableRow) tableLayout.getChildAt(i);
+                if (tableRow != null) {
+                    TextView productName = (TextView) tableRow.getChildAt(0);
+                    String prodName = productName.getText().toString().replace("/", "_");
+                    TextView productHSN = (TextView) tableRow.getChildAt(1);
+                    EditText productQTY = (EditText) tableRow.getChildAt(2);
+                    EditText productRate = (EditText) tableRow.getChildAt(3);
+                    TextView productTotal = (TextView) tableRow.getChildAt(4);
+                    String prodHSN = productHSN.getText().toString();
+                    String prodQTY = productQTY.getText().toString();
+                    String prodRate = productRate.getText().toString();
+                    String prodTotal = productTotal.getText().toString();
+                    if (!prodName.isEmpty() && !prodHSN.isEmpty() && !prodQTY.isEmpty() && Integer.parseInt(prodQTY) > 0) {
+                        sellItems.put(prodName, prodQTY);
+                        sellItemsRate.put(prodName, prodRate);
+                        sellItemsHSN.put(prodName, prodHSN);
+                        sellItemsTotal.put(prodName, prodTotal);
+                    }
+                }
+            }
+
+            HashMap<String, Object> avail = updateLeftStock();
+
+            if (localSalesMan.equals("NIL") || localSalesMan.isEmpty()) {
+                Toast.makeText(getApplicationContext(), "Select Sales Man", Toast.LENGTH_SHORT).show();
+            } else if (localCustomerName.isEmpty()) {
+                customerName.setError("Please Enter Customer name");
+                customerName.requestFocus();
+            } else if (sellItems.isEmpty()) {
+                Toast.makeText(getApplicationContext(), "Select Item for sale", Toast.LENGTH_SHORT).show();
+            } else {
+
+                int number = 1;
+                if (billNo.size() > 0) {
+                    number = Integer.parseInt(String.valueOf(billNo.get(billNo.size() - 1)));
+                    number = number + 1;
+                }
+                billNo.add(number);
+
+                HashMap<String, Object> soldOrders = new HashMap<>();
+                soldOrders.put("sold_date", Constants.currentDate());
+                soldOrders.put("bill_no", "RS-" + number);
+                soldOrders.put("sales_man_name", salesMan);
+                soldOrders.put("customer_name", localCustomerName);
+                if (!localCustomerGst.isEmpty()) {
+                    soldOrders.put("customer_gst", localCustomerGst);
+                }
+                soldOrders.put("sold_items", sellItems);
+                soldOrders.put("sold_items_rate", sellItemsRate);
+                soldOrders.put("sold_items_hsn", sellItemsHSN);
+                soldOrders.put("sold_items_total", sellItemsTotal);
+                soldOrders.put("customer_address", localCustomerAddress);
+                soldOrders.put("net_total", totalView.getText().toString());
+                soldOrders.put("sold_route", takenMap.get("sales_route"));
+                soldOrders.put("_id", key);
+
+
+                final HashMap<String, Object> finalSoldOrders = soldOrders;
+                final HashMap<String, Object> finalAvail = avail;
+                final int finalNumber = number;
+
+                FirebaseFirestore dbStore = FirebaseFirestore.getInstance();
+
+                dbStore.collection(Constants.SALES_MAN_BILLING)
+                        .add(finalSoldOrders)
+                        .addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
+                            @Override
+                            public void onComplete(@NonNull Task<DocumentReference> task) {
+                                if (task.isSuccessful()) {
+                                    FireBaseAPI.takenDBRef.child(key).child("sales_order_qty_left").updateChildren(finalAvail);
+                                    FireBaseAPI.billNoDBRef.setValue(billNo);
+                                    Intent intent = new Intent(TakenSellStoreActivity.this, PrintActivity.class);
+                                    intent.putExtra("key", task.getResult().getId());
+                                    intent.putExtra("bill_no", "RS-" + finalNumber);
+                                    intent.putExtra("sold_orders", finalSoldOrders);
+                                    startActivity(intent);
+                                    finish();
+                                }
                             }
-                        }
-                    });
-            alertbox.setNegativeButton("cancel", new
-                    DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int arg1) {
-                            dialog.dismiss();
-                        }
-                    });
+                        });
 
-            alertbox.show();
-
+            }
         } else {
             Toast.makeText(getApplicationContext(), "Storage permission is required", Toast.LENGTH_SHORT).show();
         }
 
-    }
-
-
-    private void sales() throws ParseException {
-        String localSalesMan = (String) salesManListView.getText();
-        String localCustomerName = String.valueOf(customerName.getText());
-        String localCustomerGst = String.valueOf(customerGst.getText());
-        String localCustomerAddress = String.valueOf(customerAddress.getText());
-
-        for (int i = 0; i < tableLayout.getChildCount(); i++) {
-            TableRow tableRow = (TableRow) tableLayout.getChildAt(i);
-            if (tableRow != null) {
-                TextView productName = (TextView) tableRow.getChildAt(0);
-                String prodName = productName.getText().toString().replace("/", "_");
-                TextView productHSN = (TextView) tableRow.getChildAt(1);
-                EditText productQTY = (EditText) tableRow.getChildAt(2);
-                EditText productRate = (EditText) tableRow.getChildAt(3);
-                TextView productTotal = (TextView) tableRow.getChildAt(4);
-                String prodHSN = productHSN.getText().toString();
-                String prodQTY = productQTY.getText().toString();
-                String prodRate = productRate.getText().toString();
-                String prodTotal = productTotal.getText().toString();
-                if (!prodName.isEmpty() && !prodHSN.isEmpty() && !prodQTY.isEmpty() && Integer.parseInt(prodQTY) > 0) {
-                    sellItems.put(prodName, prodQTY);
-                    sellItemsRate.put(prodName, prodRate);
-                    sellItemsHSN.put(prodName, prodHSN);
-                    sellItemsTotal.put(prodName, prodTotal);
-                }
-            }
-        }
-
-        HashMap<String, Object> avail = updateLeftStock();
-
-        if (localSalesMan.equals("NIL") || localSalesMan.isEmpty()) {
-            Toast.makeText(getApplicationContext(), "Select Sales Man", Toast.LENGTH_SHORT).show();
-        } else if (localCustomerName.isEmpty()) {
-            customerName.setError("Please Enter Customer name");
-            customerName.requestFocus();
-        } else if (sellItems.isEmpty()) {
-            Toast.makeText(getApplicationContext(), "Select Item for sale", Toast.LENGTH_SHORT).show();
-        } else {
-
-            int number = 1;
-            if (billNo.size() > 0) {
-                number = Integer.parseInt(String.valueOf(billNo.get(billNo.size() - 1)));
-                number = number + 1;
-            }
-            billNo.add(number);
-
-            HashMap<String, Object> soldOrders = new HashMap<>();
-            soldOrders.put("sold_date", Constants.currentDate());
-            soldOrders.put("bill_no", "RS-" + number);
-            soldOrders.put("sales_man_name", salesMan);
-            soldOrders.put("customer_name", localCustomerName);
-            if (!localCustomerGst.isEmpty()) {
-                soldOrders.put("customer_gst", localCustomerGst);
-            }
-            soldOrders.put("sold_items", sellItems);
-            soldOrders.put("sold_items_rate", sellItemsRate);
-            soldOrders.put("sold_items_hsn", sellItemsHSN);
-            soldOrders.put("sold_items_total", sellItemsTotal);
-            soldOrders.put("customer_address", localCustomerAddress);
-            soldOrders.put("net_total", totalView.getText().toString());
-            soldOrders.put("sold_route", takenMap.get("sales_route"));
-            FireBaseAPI.billingDBREf.child(key).child("RS-" + number).updateChildren(soldOrders);
-            FireBaseAPI.takenDBRef.child(key).child("sales_order_qty_left").updateChildren(avail);
-            FireBaseAPI.billNoDBRef.setValue(billNo);
-
-            Intent intent = new Intent(TakenSellActivity.this, PrintActivity.class);
-            intent.putExtra("key", key);
-            intent.putExtra("bill_no", "RS-" + number);
-            intent.putExtra("sold_orders", soldOrders);
-            startActivity(intent);
-            finish();
-        }
     }
 
 
