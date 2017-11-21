@@ -1,4 +1,5 @@
 <resources>
+    <string name="app_store_name">QuickSale</string>
     <string name="app_name">QS-User</string>
     <string name="title_activity_landing">LandingActivity</string>
 
@@ -12,7 +13,7 @@
     <string name="sales">Sales</string>
     <string name="resources">Resources</string>
     <string name="sales_man">Sales Man</string>
-    <string name="items_set_up">Items set-up</string>
+    <string name="view_items">View Items</string>
     <string name="date">Date</string>
     <string name="submit">SUBMIT</string>
     <string name="party_name">Party Name</string>
@@ -50,4 +51,5 @@
     <string name="rate">Rate</string>
     <string name="total">Total</string>
     <string name="no_bill">No Bill</string>
+    <string name="view_bills">View Bills</string>
 </resources>

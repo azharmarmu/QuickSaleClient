@@ -68,6 +68,8 @@
         <activity
             android:name=".activity.PrintActivity"
             android:windowSoftInputMode="stateHidden" />
+        <activity android:name=".activity.TakenSellStoreActivity" />
+        <activity android:name=".activity.TakenBillingStoreActivity" />
     </application>
 
 </manifest>
