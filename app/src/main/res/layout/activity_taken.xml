@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     android:layout_gravity="center"
     android:orientation="vertical"
-    tools:context="marmu.com.quicksaleclient.activity.TakenActivity">
+    tools:context="azhar.com.quicksaleclient.activity.TakenActivity">
 
     <TextView
         android:layout_width="match_parent"

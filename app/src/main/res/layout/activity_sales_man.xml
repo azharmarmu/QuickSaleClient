@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="marmu.com.quicksale.activity.SalesManActivity">
+    tools:context="azhar.com.quicksale.activity.SalesManActivity">
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rv_sales_man"
