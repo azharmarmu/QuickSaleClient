@@ -16,6 +16,9 @@ import java.util.Date;
 public class Constants {
     public static final FirebaseAuth AUTH = FirebaseAuth.getInstance();
     public static final FirebaseDatabase DATABASE = FirebaseDatabase.getInstance();
+    public static final String ENV = "development";
+    //public static final String ENV = "production";
+
     public static final String USERS = "users";
     public static final String ADMIN_TAKEN = "taken";
     public static final String ADMIN_ORDER = "order";

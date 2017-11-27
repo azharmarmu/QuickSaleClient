@@ -15,7 +15,7 @@ import java.util.List;
 
 import azhar.com.quicksaleclient.R;
 import azhar.com.quicksaleclient.activity.TakenActivity;
-import azhar.com.quicksaleclient.api.FireBaseAPI;
+import azhar.com.quicksaleclient.api.TakenApi;
 import azhar.com.quicksaleclient.model.TakenModel;
 
 
@@ -42,12 +42,15 @@ public class TakenAdapter extends RecyclerView.Adapter<TakenAdapter.MyViewHolder
         return new TakenAdapter.MyViewHolder(itemView);
     }
 
-    @SuppressLint("RecyclerView")
+    @SuppressLint({"RecyclerView", "SetTextI18n"})
     @Override
     public void onBindViewHolder(final MyViewHolder holder, final int position) {
         final TakenModel taken = takenList.get(position);
         final HashMap<String, Object> takenMap = taken.getTakenMap();
-        holder.takenName.setText(takenMap.get("sales_man_name").toString() + " / " + takenMap.get("sales_route").toString());
+        holder.takenName.setText("");
+        holder.takenName.append(takenMap.get("sales_man_name").toString() +
+                " / " +
+                takenMap.get("sales_route").toString());
 
         if (takenMap.get("process").toString().equalsIgnoreCase("start")) {
             holder.takenStart.setText("Start");
@@ -66,7 +69,7 @@ public class TakenAdapter extends RecyclerView.Adapter<TakenAdapter.MyViewHolder
             @Override
             public void onClick(View v) {
 
-                FireBaseAPI.takenDBRef.child(taken.getKey()).child("process").setValue("started");
+                TakenApi.takenDBRef.child(taken.getKey()).child("process").setValue("started");
 
                 Intent editIntent = new Intent(context, TakenActivity.class);
                 editIntent.putExtra("key", taken.getKey());
@@ -78,7 +81,7 @@ public class TakenAdapter extends RecyclerView.Adapter<TakenAdapter.MyViewHolder
         holder.takenClose.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                FireBaseAPI.takenDBRef.child(taken.getKey()).child("process").setValue("close");
+                TakenApi.takenDBRef.child(taken.getKey()).child("process").setValue("close");
             }
         });
 

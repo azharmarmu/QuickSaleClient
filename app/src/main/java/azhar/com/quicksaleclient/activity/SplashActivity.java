@@ -5,7 +5,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 
-import azhar.com.quicksaleclient.api.FireBaseAPI;
+import azhar.com.quicksaleclient.api.BillNoApi;
+import azhar.com.quicksaleclient.api.CustomerApi;
+import azhar.com.quicksaleclient.api.ProductsApi;
+import azhar.com.quicksaleclient.api.SalesManApi;
+import azhar.com.quicksaleclient.api.UsersApi;
 import azhar.com.quicksaleclient.utils.Constants;
 
 public class SplashActivity extends AppCompatActivity {
@@ -14,12 +18,12 @@ public class SplashActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        FireBaseAPI.getCustomer();
-        FireBaseAPI.getSalesMan();
-        FireBaseAPI.getUsers();
-        FireBaseAPI.getBillNo();
-        FireBaseAPI.getProductPrice();
-        FireBaseAPI.getProductHSN();
+        new SalesManApi().getSalesMan(); //calling salesman Api
+        new CustomerApi().getCustomer(); //calling Customer Api
+        new UsersApi().getUsers(); //calling Users Api
+        new BillNoApi().getBillNo(); //calling BillNo Api
+        new ProductsApi().getProductPrice(); //calling Products Price Api
+        new ProductsApi().getProductHSN(); //calling Products Price Api
 
         new Handler().postDelayed(new Runnable() {
             @Override
