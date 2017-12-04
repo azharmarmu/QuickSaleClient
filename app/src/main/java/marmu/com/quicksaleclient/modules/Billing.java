@@ -1,19 +1,23 @@
 package marmu.com.quicksaleclient.modules;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.DatePickerDialog;
-import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.DatePicker;
-import android.widget.EditText;
+import android.widget.TextView;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -25,9 +29,12 @@ import java.util.HashMap;
 import java.util.List;
 
 import marmu.com.quicksaleclient.R;
+import marmu.com.quicksaleclient.activity.LandingActivity;
 import marmu.com.quicksaleclient.adapter.BillAdapter;
-import marmu.com.quicksaleclient.api.FireBaseAPI;
 import marmu.com.quicksaleclient.model.BillModel;
+import marmu.com.quicksaleclient.utils.Constants;
+import marmu.com.quicksaleclient.utils.DialogUtils;
+import marmu.com.quicksaleclient.utils.Persistance;
 
 /**
  * Created by azharuddin on 25/7/17.
@@ -36,78 +43,84 @@ import marmu.com.quicksaleclient.model.BillModel;
 @SuppressLint("SimpleDateFormat")
 @SuppressWarnings({"deprecation", "unchecked"})
 public class Billing {
-    private static List<BillModel> billingList;
+    private static final String TAG = "Billing";
+    private String key;
+    private List<BillModel> billList = new ArrayList<>();
 
-    public static void evaluate(final Context context, View itemView) {
+    private Activity activity;
+    private View itemView;
+    private TextView datePicker;
+
+    public void evaluate(LandingActivity activity, View itemView) {
 
         try {
-            final EditText datePicker = itemView.findViewById(R.id.et_date_picker);
+            this.activity = activity;
+            this.itemView = itemView;
 
-            Date currentDate = new Date();
-            Calendar calendar = new GregorianCalendar();
-            calendar.setTime(currentDate);
-            int year = calendar.get(Calendar.YEAR);
-            int month = calendar.get(Calendar.MONTH) + 1;
-            int day = calendar.get(Calendar.DAY_OF_MONTH);
+            initViews();
+            currentDate();
 
-            if (month <= 9) {
-                datePicker.setText(day + "/" + "0" + (month) + "/" + year);
-            } else {
-                datePicker.setText(day + "/" + (month) + "/" + year);
-            }
-            SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
-            Date pickedDate = formatter.parse(datePicker.getText().toString());
-
-            changeMapToList(context, itemView, pickedDate);
+            datePicker();
         } catch (ParseException e) {
             e.printStackTrace();
         }
 
-        datePicker(context, itemView);
     }
 
-    private static void changeMapToList(final Context context, final View itemView, final Date pickedDate) {
-        FireBaseAPI.billingDBREf.keepSynced(true);
-        FireBaseAPI.billingDBREf.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.getValue() != null) {
-                    FireBaseAPI.billing = (HashMap<String, Object>) dataSnapshot.getValue();
-                    HashMap<String, Object> billing = FireBaseAPI.billing;
-                    billingList = new ArrayList<>();
-                    if (billing != null) {
-                        for (String key : billing.keySet()) {
-                            HashMap<String, Object> bill = (HashMap<String, Object>) billing.get(key);
-                            SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
-                            try {
-                                for (String name : bill.keySet()) {
-                                    HashMap<String, Object> billName = (HashMap<String, Object>) bill.get(name);
-                                    Date salesDate = formatter.parse(billName.get("sold_date").toString());
-                                    if (pickedDate.compareTo(salesDate) == 0) {
-                                        billingList.add(new BillModel(key, name, billName));
-                                    }
-                                }
-                            } catch (ParseException e) {
-                                e.printStackTrace();
+    private void initViews() {
+        datePicker = itemView.findViewById(R.id.et_date_picker);
+    }
+
+    private void currentDate() throws ParseException {
+        Date currentDate = new Date();
+        Calendar calendar = new GregorianCalendar();
+        calendar.setTime(currentDate);
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH) + 1;
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+        if (month <= 9) {
+            datePicker.setText("");
+            datePicker.append(day + "/" + "0" + (month) + "/" + year);
+        } else {
+            datePicker.setText("");
+            datePicker.append(day + "/" + (month) + "/" + year);
+        }
+        changeMapToList(datePicker.getText().toString());
+    }
+
+    private void changeMapToList(String pickedDate) {
+        //Todo need to fetch from CloudStore
+        DialogUtils.showProgressDialog(activity, "Loading...");
+        FirebaseFirestore.getInstance()
+                .collection(Constants.BILLING)
+                .orderBy("billNo", Query.Direction.ASCENDING)
+                .whereEqualTo("date", pickedDate)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    TextView noBill = itemView.findViewById(R.id.no_bill);
+
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        billList.clear();
+                        DialogUtils.dismissProgressDialog();
+                        if (task.isSuccessful()) {
+                            noBill.setVisibility(View.GONE);
+                            for (DocumentSnapshot document : task.getResult()) {
+                                Log.d(TAG, document.getId() + " => " + document.getData());\
+                                String number = Persistance.getUserData(Constants.MY_PHONE, LandingActivity.this);
+                                if(document.get("salesMan"))
+                                billList.add(new BillModel(key,
+                                        document.getId(),
+                                        (HashMap<String, Object>) document.getData()));
                             }
                         }
                     }
-                    populateTaken(context, itemView);
-                } else {
-                    FireBaseAPI.billing.clear();
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.e("FireError", databaseError.getMessage());
-            }
-        });
+                });
     }
 
     @SuppressLint("SimpleDateFormat")
-    private static void datePicker(final Context context, final View itemView) {
-        final EditText datePicker = itemView.findViewById(R.id.et_date_picker);
+    private void datePicker() {
+        final TextView datePicker = itemView.findViewById(R.id.et_date_picker);
 
         datePicker.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -117,7 +130,7 @@ public class Billing {
                 final int mMonth = c.get(Calendar.MONTH);
                 final int mDay = c.get(Calendar.DAY_OF_MONTH);
 
-                DatePickerDialog datePickerDialog = new DatePickerDialog(context,
+                DatePickerDialog datePickerDialog = new DatePickerDialog(activity,
                         new DatePickerDialog.OnDateSetListener() {
 
                             @Override
@@ -137,12 +150,14 @@ public class Billing {
                                     Date currentDate = formatter.parse((cDay + "-" + cMonth + "-" + cYear));
                                     if (pickedDate.compareTo(currentDate) <= 0) {
                                         if ((monthOfYear + 1) <= 9) {
-                                            datePicker.setText(dayOfMonth + "/0" + (monthOfYear + 1) + "/" + year);
+                                            datePicker.setText("");
+                                            datePicker.append(dayOfMonth + "/0" + (monthOfYear + 1) + "/" + year);
                                         } else {
-                                            datePicker.setText(dayOfMonth + "/" +(monthOfYear + 1) + "/" + year);
+                                            datePicker.setText("");
+                                            datePicker.append(dayOfMonth + "/" + (monthOfYear + 1) + "/" + year);
                                         }
                                         datePicker.clearFocus();
-                                        changeMapToList(context, itemView, pickedDate);
+                                        changeMapToList(datePicker.getText().toString());
                                     } else {
                                         datePicker.setError("Choose Valid date");
                                     }
@@ -156,12 +171,11 @@ public class Billing {
         });
     }
 
-    private static void populateTaken(Context context, View itemView) {
-
-        BillAdapter adapter = new BillAdapter(context, billingList);
+    private void populateTaken() {
+        BillAdapter adapter = new BillAdapter(activity, billList);
         RecyclerView orderView = itemView.findViewById(R.id.rv_orders);
         orderView.removeAllViews();
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(context);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(activity);
         orderView.setLayoutManager(layoutManager);
         orderView.setItemAnimator(new DefaultItemAnimator());
         orderView.setAdapter(adapter);

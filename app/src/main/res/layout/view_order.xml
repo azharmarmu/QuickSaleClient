@@ -45,7 +45,7 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btn_create_order" />
 
-    <EditText
+    <TextView
         android:id="@+id/et_date_picker"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -54,7 +54,6 @@
         android:background="@drawable/box_white_thick_border_corner_ripple"
         android:ems="10"
         android:hint="@string/date"
-        android:inputType="date"
         android:padding="16dp"
         android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
         android:textColor="@color/colorLightBlack"

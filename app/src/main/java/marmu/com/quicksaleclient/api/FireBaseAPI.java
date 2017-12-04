@@ -28,7 +28,7 @@ public class FireBaseAPI {
     public static DatabaseReference productDBRef = Constants.DATABASE.getReference(Constants.ADMIN_PRODUCT_PRICE);
     public static DatabaseReference productHsnDBRef = Constants.DATABASE.getReference(Constants.ADMIN_PRODUCT_HSN);
     public static DatabaseReference orderDBRef = Constants.DATABASE.getReference(Constants.ADMIN_ORDER);
-    public static DatabaseReference billingDBREf = Constants.DATABASE.getReference(Constants.SALES_MAN_BILLING);
+    public static DatabaseReference billingDBREf = Constants.DATABASE.getReference(Constants.BILLING);
     public static DatabaseReference usersDBRef = Constants.DATABASE.getReference(Constants.USERS);
     public static DatabaseReference billNoDBRef = Constants.DATABASE.getReference(Constants.BILL_NO);
     public static HashMap<String, Object> salesMan = new HashMap<>();

@@ -37,6 +37,7 @@ import java.util.List;
 import marmu.com.quicksaleclient.R;
 import marmu.com.quicksaleclient.api.FireBaseAPI;
 import marmu.com.quicksaleclient.utils.Constants;
+import marmu.com.quicksaleclient.utils.DialogUtils;
 import marmu.com.quicksaleclient.utils.Permissions;
 
 @SuppressWarnings({"unchecked", "deprecation"})
@@ -44,9 +45,6 @@ public class TakenSellStoreActivity extends AppCompatActivity {
     String key;
     HashMap<String, Object> takenMap = new HashMap<>();
     HashMap<String, Object> sellItems = new HashMap<>();
-    HashMap<String, Object> sellItemsRate = new HashMap<>();
-    HashMap<String, Object> sellItemsHSN = new HashMap<>();
-    HashMap<String, Object> sellItemsTotal = new HashMap<>();
     HashMap<String, Object> itemDetails = new HashMap<>();
 
     TextView salesManListView, totalView;
@@ -335,20 +333,25 @@ public class TakenSellStoreActivity extends AppCompatActivity {
                 TableRow tableRow = (TableRow) tableLayout.getChildAt(i);
                 if (tableRow != null) {
                     TextView productName = (TextView) tableRow.getChildAt(0);
-                    String prodName = productName.getText().toString().replace("/", "_");
                     TextView productHSN = (TextView) tableRow.getChildAt(1);
                     EditText productQTY = (EditText) tableRow.getChildAt(2);
                     EditText productRate = (EditText) tableRow.getChildAt(3);
                     TextView productTotal = (TextView) tableRow.getChildAt(4);
+                    String prodName = productName.getText().toString()
+                            .replace("/", "_");
                     String prodHSN = productHSN.getText().toString();
                     String prodQTY = productQTY.getText().toString();
                     String prodRate = productRate.getText().toString();
                     String prodTotal = productTotal.getText().toString();
                     if (!prodName.isEmpty() && !prodHSN.isEmpty() && !prodQTY.isEmpty() && Integer.parseInt(prodQTY) > 0) {
-                        sellItems.put(prodName, prodQTY);
-                        sellItemsRate.put(prodName, prodRate);
-                        sellItemsHSN.put(prodName, prodHSN);
-                        sellItemsTotal.put(prodName, prodTotal);
+
+                        HashMap<String, Object> items = new HashMap<>();
+                        items.put("name", prodName);
+                        items.put("qty", prodQTY);
+                        items.put("rate", prodRate);
+                        items.put("hsn", prodHSN);
+                        items.put("total", prodTotal);
+                        sellItems.put(prodName, items);
                     }
                 }
             }
@@ -371,22 +374,22 @@ public class TakenSellStoreActivity extends AppCompatActivity {
                 }
                 billNo.add(number);
 
-                HashMap<String, Object> soldOrders = new HashMap<>();
-                soldOrders.put("sold_date", Constants.currentDate());
-                soldOrders.put("bill_no", "RS-" + number);
-                soldOrders.put("sales_man_name", salesMan);
-                soldOrders.put("customer_name", localCustomerName);
+                HashMap<String, Object> customerDetails = new HashMap<>();
+                customerDetails.put("name", localCustomerName);
                 if (!localCustomerGst.isEmpty()) {
-                    soldOrders.put("customer_gst", localCustomerGst);
+                    customerDetails.put("gst", localCustomerGst);
                 }
-                soldOrders.put("sold_items", sellItems);
-                soldOrders.put("sold_items_rate", sellItemsRate);
-                soldOrders.put("sold_items_hsn", sellItemsHSN);
-                soldOrders.put("sold_items_total", sellItemsTotal);
-                soldOrders.put("customer_address", localCustomerAddress);
-                soldOrders.put("net_total", totalView.getText().toString());
-                soldOrders.put("sold_route", takenMap.get("sales_route"));
+                customerDetails.put("address", localCustomerAddress);
+
+                HashMap<String, Object> soldOrders = new HashMap<>();
                 soldOrders.put("_id", key);
+                soldOrders.put("date", Constants.currentDate());
+                soldOrders.put("billNo", "RS-" + number);
+                soldOrders.put("salesMan", salesMan);
+                soldOrders.put("customer", customerDetails);
+                soldOrders.put("items", sellItems);
+                soldOrders.put("netTotal", totalView.getText().toString());
+                soldOrders.put("route", takenMap.get("sales_route"));
 
 
                 final HashMap<String, Object> finalSoldOrders = soldOrders;
@@ -395,18 +398,21 @@ public class TakenSellStoreActivity extends AppCompatActivity {
 
                 FirebaseFirestore dbStore = FirebaseFirestore.getInstance();
 
-                dbStore.collection(Constants.SALES_MAN_BILLING)
+
+                DialogUtils.showProgressDialog(TakenSellStoreActivity.this, "Loading...");
+                dbStore.collection(Constants.BILLING)
                         .add(finalSoldOrders)
                         .addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
                             @Override
                             public void onComplete(@NonNull Task<DocumentReference> task) {
                                 if (task.isSuccessful()) {
+                                    DialogUtils.dismissProgressDialog();
                                     FireBaseAPI.takenDBRef.child(key).child("sales_order_qty_left").updateChildren(finalAvail);
                                     FireBaseAPI.billNoDBRef.setValue(billNo);
                                     Intent intent = new Intent(TakenSellStoreActivity.this, PrintActivity.class);
                                     intent.putExtra("key", task.getResult().getId());
-                                    intent.putExtra("bill_no", "RS-" + finalNumber);
-                                    intent.putExtra("sold_orders", finalSoldOrders);
+                                    intent.putExtra("billNo", "RS-" + finalNumber);
+                                    intent.putExtra("items", finalSoldOrders);
                                     startActivity(intent);
                                     finish();
                                 }
@@ -425,8 +431,9 @@ public class TakenSellStoreActivity extends AppCompatActivity {
         HashMap<String, Object> avail = new HashMap<>();
         for (String key : itemDetails.keySet()) {
             if (sellItems.containsKey(key)) {
+                HashMap<String, Object> items = (HashMap<String, Object>) sellItems.get(key);
                 int left = Integer.parseInt(itemDetails.get(key).toString());
-                int sold = Integer.parseInt(sellItems.get(key).toString());
+                int sold = Integer.parseInt(items.get("qty").toString());
                 String available = String.valueOf(left - sold);
                 avail.put(key, available);
             }

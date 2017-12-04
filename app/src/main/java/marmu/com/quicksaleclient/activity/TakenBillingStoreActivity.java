@@ -25,6 +25,7 @@ import marmu.com.quicksaleclient.R;
 import marmu.com.quicksaleclient.adapter.BillAdapter;
 import marmu.com.quicksaleclient.model.BillModel;
 import marmu.com.quicksaleclient.utils.Constants;
+import marmu.com.quicksaleclient.utils.DialogUtils;
 
 @SuppressWarnings("unchecked")
 public class TakenBillingStoreActivity extends AppCompatActivity {
@@ -41,9 +42,11 @@ public class TakenBillingStoreActivity extends AppCompatActivity {
         if (extras != null) {
             key = (String) extras.get("key");
 
+            DialogUtils.showProgressDialog(this, "Loading...");
             FirebaseFirestore.getInstance()
-                    .collection(Constants.SALES_MAN_BILLING)
-                    .orderBy("bill_no", Query.Direction.ASCENDING)
+                    .collection(Constants.BILLING)
+                    .orderBy("billNo", Query.Direction.ASCENDING)
+                    .whereEqualTo("_id", key)
                     .get()
                     .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                         TextView noBill = (TextView) findViewById(R.id.no_bill);
@@ -51,6 +54,7 @@ public class TakenBillingStoreActivity extends AppCompatActivity {
                         @Override
                         public void onComplete(@NonNull Task<QuerySnapshot> task) {
                             billList.clear();
+                            DialogUtils.dismissProgressDialog();
                             if (task.isSuccessful()) {
                                 noBill.setVisibility(View.GONE);
                                 for (DocumentSnapshot document : task.getResult()) {

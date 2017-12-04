@@ -53,7 +53,8 @@ public class BillAdapter extends RecyclerView.Adapter<BillAdapter.MyViewHolder> 
     public void onBindViewHolder(final MyViewHolder holder, final int position) {
         final BillModel billModel = billList.get(position);
         final HashMap<String, Object> soldOrders = billModel.getBillMap();
-        holder.billName.setText((String) soldOrders.get("customer_name"));
+        HashMap<String, Object> customerDetails = (HashMap<String, Object>) soldOrders.get("customer");
+        holder.billName.setText((String) customerDetails.get("name"));
 
         holder.billStart.setText("Print");
         holder.billClose.setText("Delete");
@@ -64,8 +65,8 @@ public class BillAdapter extends RecyclerView.Adapter<BillAdapter.MyViewHolder> 
                 //// TODO: 30/9/17  edit has to be done
                 Intent intent = new Intent(context, PrintActivity.class);
                 intent.putExtra("key", billModel.getName());
-                intent.putExtra("bill_no", (String) soldOrders.get("bill_no"));
-                intent.putExtra("sold_orders", soldOrders);
+                intent.putExtra("billNo", (String) soldOrders.get("billNo"));
+                intent.putExtra("items", soldOrders);
                 context.startActivity(intent);
             }
         });
@@ -74,14 +75,14 @@ public class BillAdapter extends RecyclerView.Adapter<BillAdapter.MyViewHolder> 
             @Override
             public void onClick(View view) {
                 FirebaseFirestore dbStore = FirebaseFirestore.getInstance();
-                dbStore.collection(Constants.SALES_MAN_BILLING)
+                dbStore.collection(Constants.BILLING)
                         .document(billModel.getName())
                         .delete().addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
                             Toast.makeText(context,
-                                    "Amount added successfully!",
+                                    "Bill Deleted successfully!",
                                     Toast.LENGTH_SHORT).show();
                             billList.remove(position);
                             re_AddItemsToStock(billModel);
@@ -96,14 +97,15 @@ public class BillAdapter extends RecyclerView.Adapter<BillAdapter.MyViewHolder> 
 
     private void re_AddItemsToStock(BillModel billModel) {
         HashMap<String, Object> bill = billModel.getBillMap();
-        HashMap<String, Object> itemStock = (HashMap<String, Object>) bill.get("sold_items");
+        HashMap<String, Object> itemStock = (HashMap<String, Object>) bill.get("items");
         HashMap<String, Object> takenMap = (HashMap<String, Object>) FireBaseAPI.taken.get(billModel.getKey());
         HashMap<String, Object> orders = new HashMap<>();
         HashMap<String, Object> qtyLeft = (HashMap<String, Object>) takenMap.get("sales_order_qty_left");
 
         for (String itemKey : itemStock.keySet()) {
-                int itemVal = Integer.parseInt(itemStock.get(itemKey).toString());
-                int qtyVal = Integer.parseInt(qtyLeft.get(itemKey).toString());
+            HashMap<String, Object> itemDetails = (HashMap<String, Object>) itemStock.get(itemKey);
+            int itemVal = Integer.parseInt(itemDetails.get("qty").toString());
+            int qtyVal = Integer.parseInt(qtyLeft.get(itemKey).toString());
 
             orders.put(itemKey, String.valueOf(itemVal + qtyVal));
         }

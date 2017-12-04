@@ -10,7 +10,6 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.DatePicker;
-import android.widget.EditText;
 import android.widget.TextView;
 
 import com.google.firebase.database.DataSnapshot;
@@ -44,7 +43,7 @@ public class Order {
     public static void evaluate(final Context context, View itemView) {
 
         try {
-            final EditText datePicker = itemView.findViewById(R.id.et_date_picker);
+            final TextView datePicker = itemView.findViewById(R.id.et_date_picker);
 
             Date currentDate = new Date();
             Calendar calendar = new GregorianCalendar();
@@ -54,9 +53,11 @@ public class Order {
             int day = calendar.get(Calendar.DAY_OF_MONTH);
 
             if (month <= 9) {
-                datePicker.setText(day + "/" + "0" + (month) + "/" + year);
+                datePicker.setText("");
+                datePicker.append(day + "/" + "0" + (month) + "/" + year);
             } else {
-                datePicker.setText(day + "/" + (month) + "/" + year);
+                datePicker.setText("");
+                datePicker.append(day + "/" + (month) + "/" + year);
             }
             SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
             Date pickedDate = formatter.parse(datePicker.getText().toString());
@@ -108,7 +109,7 @@ public class Order {
 
     @SuppressLint("SimpleDateFormat")
     private static void datePicker(final Context context, final View itemView) {
-        final EditText datePicker = itemView.findViewById(R.id.et_date_picker);
+        final TextView datePicker = itemView.findViewById(R.id.et_date_picker);
 
         datePicker.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -138,9 +139,11 @@ public class Order {
                                     Date currentDate = formatter.parse((cDay + "-" + cMonth + "-" + cYear));
                                     if (pickedDate.compareTo(currentDate) <= 0) {
                                         if ((monthOfYear + 1) <= 9) {
-                                            datePicker.setText(dayOfMonth + "/0" + (monthOfYear + 1) + "/" + year);
+                                            datePicker.setText("");
+                                            datePicker.append(dayOfMonth + "/0" + (monthOfYear + 1) + "/" + year);
                                         } else {
-                                            datePicker.setText(dayOfMonth + "/" +(monthOfYear + 1) + "/" + year);
+                                            datePicker.setText("");
+                                            datePicker.append(dayOfMonth + "/" +(monthOfYear + 1) + "/" + year);
                                         }
                                         datePicker.clearFocus();
                                         changeMapToList(context, itemView, pickedDate);

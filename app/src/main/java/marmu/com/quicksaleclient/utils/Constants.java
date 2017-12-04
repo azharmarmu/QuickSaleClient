@@ -23,7 +23,7 @@ public class Constants {
     public static final String ADMIN_PRODUCT_HSN= "product_and_hsn";
     public static final String SALES_MAN = "sales_man";
     public static final String CUSTOMER = "customer";
-    public static final String SALES_MAN_BILLING = "billing";
+    public static final String BILLING = "billing";
     public static final String BILL_NO = "bill_no";
 
     public static final String EDIT = "edit";
