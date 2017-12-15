@@ -5,11 +5,16 @@ package azhar.com.quicksaleclient.model;
  */
 
 public class SalesManModel {
-    private String name, phone;
+    private String key, name, phone;
 
-    public SalesManModel(String name, String phone) {
-        this.name = name;
+    public SalesManModel(String key, String phone, String name) {
+        this.key = key;
         this.phone = phone;
+        this.name = name;
+    }
+
+    public String getKey() {
+        return key;
     }
 
     public String getName() {

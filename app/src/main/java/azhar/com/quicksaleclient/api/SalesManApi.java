@@ -9,7 +9,6 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
 
-import azhar.com.quicksaleclient.listeners.SalesManListener;
 import azhar.com.quicksaleclient.utils.Constants;
 
 import static azhar.com.quicksaleclient.api.FireBaseAPI.ENVIRONMENT;
@@ -21,7 +20,7 @@ import static azhar.com.quicksaleclient.api.FireBaseAPI.ENVIRONMENT;
 
 @SuppressWarnings("unchecked")
 public class SalesManApi {
-    private static DatabaseReference salesManDBRef = ENVIRONMENT.child(Constants.SALES_MAN);
+    public static DatabaseReference salesManDBRef = ENVIRONMENT.child(Constants.SALES_MAN);
     public static HashMap<String, Object> salesMan = new HashMap<>();
 
     public void getSalesMan() {
@@ -32,7 +31,6 @@ public class SalesManApi {
                 try {
                     if (dataSnapshot.getValue() != null) {
                         salesMan = (HashMap<String, Object>) dataSnapshot.getValue();
-                        salesManListener.getSalesMan(salesMan);
                     } else {
                         salesMan.clear();
                     }
@@ -46,11 +44,5 @@ public class SalesManApi {
                 Log.e("FireError", databaseError.getMessage());
             }
         });
-    }
-
-    private static SalesManListener salesManListener;
-
-    public void setSalesManListener(SalesManListener salesManListener) {
-        SalesManApi.salesManListener = salesManListener;
     }
 }

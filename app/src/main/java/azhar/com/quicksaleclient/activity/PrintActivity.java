@@ -31,9 +31,6 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.mocoo.hang.rtprinter.driver.Contants;
 import com.mocoo.hang.rtprinter.driver.HsBluetoothPrintDriver;
@@ -46,14 +43,14 @@ import java.text.DecimalFormat;
 import java.util.HashMap;
 
 import azhar.com.quicksaleclient.R;
-import azhar.com.quicksaleclient.api.FireBaseAPI;
 import azhar.com.quicksaleclient.utils.Constants;
 import azhar.com.quicksaleclient.utils.PrintReceipt;
+
 
 @SuppressWarnings({"unchecked", "deprecation"})
 public class PrintActivity extends AppCompatActivity {
 
-    static TextView txtPrinterStatus;
+    TextView txtPrinterStatus;
     Button mBtnConnectBluetoothDevice;
 
     private static final String TAG = "BloothPrinterActivity";
@@ -64,7 +61,6 @@ public class PrintActivity extends AppCompatActivity {
     private BluetoothAdapter mBluetoothAdapter = null;
     public static HsBluetoothPrintDriver BLUETOOTH_PRINTER = null;
 
-    private static Context CONTEXT;
     private TextView date, billNo, custName, custGST, netTotal, grossTotal, cgst, sgst;
     private TableLayout tableLayout;
     private RelativeLayout printLayout;
@@ -110,18 +106,16 @@ public class PrintActivity extends AppCompatActivity {
 
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
-            key = bundle.getString("key");
-            billNumber = bundle.getString("bill_no");
-            soldOrders = (HashMap<String, Object>) bundle.getSerializable("sold_orders");
+            key = bundle.getString(Constants.KEY);
+            billNumber = bundle.getString(Constants.BILL_NO);
+            soldOrders = (HashMap<String, Object>) bundle.getSerializable(Constants.BILL_SALES);
 
-            CONTEXT = getApplicationContext();
-
-
-            FireBaseAPI.billingDBREf.child(key).child(billNumber).child("amount_received").addValueEventListener(new ValueEventListener() {
+            //todo need to get billing amount received from firestore
+            /*FireBaseAPI.billingDBREf.child(key).child(billNumber).child("amountReceived").addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     if (dataSnapshot.getValue() != null) {
-                        EditText etAmountReceived = (EditText) findViewById(R.id.et_amount_received);
+                        EditText etAmountReceived = findViewById(R.id.et_amount_received);
                         etAmountReceived.setText(dataSnapshot.getValue().toString());
                     }
                 }
@@ -130,25 +124,25 @@ public class PrintActivity extends AppCompatActivity {
                 public void onCancelled(DatabaseError databaseError) {
                     Log.e("Error", databaseError.getMessage());
                 }
-            });
+            });*/
 
 
-            printLayout = (RelativeLayout) findViewById(R.id.print_layout);
-            date = (TextView) findViewById(R.id.date);
-            billNo = (TextView) findViewById(R.id.bill);
-            custName = (TextView) findViewById(R.id.cust_name);
-            custGST = (TextView) findViewById(R.id.cust_gst);
-            tableLayout = (TableLayout) findViewById(R.id.table_layout);
-            netTotal = (TextView) findViewById(R.id.total);
-            grossTotal = (TextView) findViewById(R.id.gross_total);
-            cgst = (TextView) findViewById(R.id.cgst);
-            sgst = (TextView) findViewById(R.id.sgst);
+            printLayout = findViewById(R.id.print_layout);
+            date = findViewById(R.id.date);
+            billNo = findViewById(R.id.bill);
+            custName = findViewById(R.id.cust_name);
+            custGST = findViewById(R.id.cust_gst);
+            tableLayout = findViewById(R.id.table_layout);
+            netTotal = findViewById(R.id.total);
+            grossTotal = findViewById(R.id.gross_total);
+            cgst = findViewById(R.id.cgst);
+            sgst = findViewById(R.id.sgst);
 
 
             populateView();
 
-            txtPrinterStatus = (TextView) findViewById(R.id.txtPrinterStatus);
-            mBtnConnectBluetoothDevice = (Button) findViewById(R.id.btn_connect_bluetooth_device);
+            txtPrinterStatus = findViewById(R.id.txtPrinterStatus);
+            mBtnConnectBluetoothDevice = findViewById(R.id.btn_connect_bluetooth_device);
             mBtnConnectBluetoothDevice.setOnClickListener(mBtnConnectBluetoothDeviceOnClickListener);
 
             alertDlgBuilder = new AlertDialog.Builder(PrintActivity.this);
@@ -166,19 +160,20 @@ public class PrintActivity extends AppCompatActivity {
     }
 
     private void populateView() {
-        billNo.append(soldOrders.get("bill_no").toString());
-        date.append(soldOrders.get("sold_date").toString());
-        custName.append(soldOrders.get("customer_name").toString());
-        if (soldOrders.containsKey("customer_gst")) {
-            custGST.append(soldOrders.get("customer_gst").toString());
+        billNo.append(soldOrders.get(Constants.BILL_NO).toString());
+        date.append(soldOrders.get(Constants.BILL_DATE).toString());
+        HashMap<String, Object> customer = (HashMap<String, Object>) soldOrders.get(Constants.BILL_CUSTOMER);
+        custName.append(customer.get(Constants.CUSTOMER_NAME).toString());
+        if (soldOrders.containsKey(Constants.CUSTOMER_GST)) {
+            custGST.append(customer.get(Constants.CUSTOMER_GST).toString());
         } else {
-            custGST.append("NIL");
+            custGST.append(getString(R.string.nil));
         }
 
         populateTable();
 
         DecimalFormat dformat = new DecimalFormat("#.##");
-        double netTot = Double.parseDouble(soldOrders.get("net_total").toString());
+        double netTot = Double.parseDouble(soldOrders.get(Constants.BILL_NET_TOTAL).toString());
         netTot = Double.valueOf(dformat.format(netTot));
         double grossTot = Double.valueOf(dformat.format(netTot / 1.05));
         double gst = Double.valueOf(dformat.format((netTot - Math.round(grossTot)) / 2));
@@ -190,12 +185,9 @@ public class PrintActivity extends AppCompatActivity {
     }
 
     private void populateTable() {
-        HashMap<String, Object> prodQTY = (HashMap<String, Object>) soldOrders.get("sold_items");
-        HashMap<String, Object> prodRate = (HashMap<String, Object>) soldOrders.get("sold_items_rate");
-        HashMap<String, Object> prodTotal = (HashMap<String, Object>) soldOrders.get("sold_items_total");
-        HashMap<String, Object> prodHSN = (HashMap<String, Object>) soldOrders.get("sold_items_hsn");
+        HashMap<String, Object> items = (HashMap<String, Object>) soldOrders.get(Constants.BILL_SALES);
 
-        for (String prodKey : prodQTY.keySet()) {
+        for (String key : items.keySet()) {
             /* Create a TableRow dynamically */
             TableRow tr = new TableRow(this);
             tr.setLayoutParams(new TableRow.LayoutParams(
@@ -209,12 +201,16 @@ public class PrintActivity extends AppCompatActivity {
             params.weight = 1.0f;
 
 
+            HashMap<String, Object> itemsDetails = (HashMap<String, Object>) items.get(key);
+
             /* Product Name --> TextView */
             TextView productName = new TextView(this);
             productName.setLayoutParams(params);
 
             productName.setTextColor(getResources().getColor(R.color.colorBlack));
-            productName.setText(prodKey + "(" + prodHSN.get(prodKey) + ")");
+            productName.setText("");
+            productName.append(itemsDetails.get(Constants.BILL_SALES_PRODUCT_NAME) +
+                    "(" + itemsDetails.get(Constants.BILL_SALES_PRODUCT_HSN) + ")");
             productName.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
             tr.addView(productName);
 
@@ -223,7 +219,7 @@ public class PrintActivity extends AppCompatActivity {
             productQTY.setLayoutParams(params);
 
             productQTY.setTextColor(getResources().getColor(R.color.colorBlack));
-            productQTY.setText(prodQTY.get(prodKey).toString());
+            productQTY.setText(itemsDetails.get(Constants.BILL_SALES_PRODUCT_QTY).toString());
             productQTY.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
             tr.addView(productQTY);
 
@@ -232,7 +228,7 @@ public class PrintActivity extends AppCompatActivity {
             productRate.setLayoutParams(params);
 
             productRate.setTextColor(getResources().getColor(R.color.colorBlack));
-            productRate.setText(prodRate.get(prodKey).toString());
+            productRate.setText(itemsDetails.get(Constants.BILL_SALES_PRODUCT_RATE).toString());
             productRate.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
             tr.addView(productRate);
 
@@ -240,7 +236,7 @@ public class PrintActivity extends AppCompatActivity {
             productQTY.setLayoutParams(params);
 
             productTotal.setTextColor(getResources().getColor(R.color.colorBlack));
-            productTotal.setText(prodTotal.get(prodKey).toString());
+            productTotal.setText(itemsDetails.get(Constants.BILL_SALES_PRODUCT_TOTAL).toString());
             productTotal.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
             tr.addView(productTotal);
             // Adding textView to table-row.
@@ -251,28 +247,27 @@ public class PrintActivity extends AppCompatActivity {
     }
 
     private void initializeBluetoothDevice() {
-        Log.d(TAG, "setupChat()");
         // Initialize HsBluetoothPrintDriver class to perform bluetooth connections
         BLUETOOTH_PRINTER = HsBluetoothPrintDriver.getInstance();//
-        BLUETOOTH_PRINTER.setHandler(new BluetoothHandler(PrintActivity.this));
+        BLUETOOTH_PRINTER.setHandler(new BluetoothHandler(PrintActivity.this, txtPrinterStatus));
     }
 
     public void printBill(View view) {
         if (!BLUETOOTH_PRINTER.IsNoConnection()) {
-            Bitmap bitmap = saveBitMap(printLayout, soldOrders.get("bill_no").toString());
+            Bitmap bitmap = saveBitMap(printLayout, soldOrders.get(Constants.BILL_NO).toString());
             printBillBitMap(bitmap);
         } else {
-            Toast.makeText(getApplicationContext(), "Connect Printer", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), R.string.connect_printer, Toast.LENGTH_SHORT).show();
         }
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     private Bitmap saveBitMap(View drawView, String billNo) {
-        File pictureFileDir = new File(Environment.getExternalStorageDirectory(), "QS_POS");
+        File pictureFileDir = new File(Environment.getExternalStorageDirectory(), getString(R.string._dir));
         if (!pictureFileDir.exists()) {
             boolean isDirectoryCreated = pictureFileDir.mkdirs();
             if (!isDirectoryCreated)
-                Log.i("ATG", "Can't create directory to save the image");
+                Log.i(getString(R.string.error), "Can't create directory to save the image");
             return null;
         }
         String filename = pictureFileDir.getPath() + File.separator + billNo + ".jpg";
@@ -286,7 +281,7 @@ public class PrintActivity extends AppCompatActivity {
             oStream.close();
         } catch (IOException e) {
             e.printStackTrace();
-            Log.i("TAG", "There was an issue saving the image.");
+            Log.i(getString(R.string.error), "There was an issue saving the image.");
         }
         //scanGallery(context, pictureFile.getAbsolutePath());
         return bitmap;
@@ -327,9 +322,9 @@ public class PrintActivity extends AppCompatActivity {
         }
 
         FirebaseFirestore dbStore = FirebaseFirestore.getInstance();
-        dbStore.collection(Constants.SALES_MAN_BILLING)
+        dbStore.collection(Constants.BILLING)
                 .document(key)
-                .update("amount_received", amountReceived)
+                .update(Constants.BILL_AMOUNT_RECEIVED, amountReceived)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
@@ -346,10 +341,14 @@ public class PrintActivity extends AppCompatActivity {
 
     private static class BluetoothHandler extends Handler {
         private final WeakReference<PrintActivity> myWeakReference;
+        private TextView txtPrinterStatus;
+        private Context CONTEXT;
 
         //Creating weak reference of BluetoothPrinterActivity class to avoid any leak
-        BluetoothHandler(PrintActivity weakReference) {
+        BluetoothHandler(PrintActivity weakReference, TextView txtPrinterStatus) {
             myWeakReference = new WeakReference<>(weakReference);
+            this.txtPrinterStatus = txtPrinterStatus;
+            CONTEXT = weakReference;
         }
 
         @Override
@@ -436,6 +435,7 @@ public class PrintActivity extends AppCompatActivity {
 
     };
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.d(TAG, "onActivityResult " + resultCode);

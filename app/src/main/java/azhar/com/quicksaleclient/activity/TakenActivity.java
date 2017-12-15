@@ -2,18 +2,20 @@ package azhar.com.quicksaleclient.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
 
 import azhar.com.quicksaleclient.R;
-import azhar.com.quicksaleclient.api.FireBaseAPI;
+import azhar.com.quicksaleclient.api.TakenApi;
+import azhar.com.quicksaleclient.utils.Constants;
 
 @SuppressWarnings("unchecked")
 public class TakenActivity extends AppCompatActivity {
@@ -29,64 +31,52 @@ public class TakenActivity extends AppCompatActivity {
         Bundle extras = getIntent().getExtras();
 
         if (extras != null) {
-            key = (String) extras.get("key");
-            for (String my_key : FireBaseAPI.taken.keySet()) {
+            key = (String) extras.get(Constants.KEY);
+            for (String my_key : TakenApi.taken.keySet()) {
                 if (key.equals(my_key)) {
-                    takenMap = (HashMap<String, Object>) FireBaseAPI.taken.get(key);
+                    takenMap = (HashMap<String, Object>) TakenApi.taken.get(key);
                     break;
                 }
             }
         }
-
-    }
-
-    public void purchaseClick(View view) {
-        Intent takenPurchaseActivity = new Intent(TakenActivity.this, TakenSellActivity.class);
-        takenPurchaseActivity.putExtra("key", key);
-        startActivity(takenPurchaseActivity);
     }
 
     public void purchaseStoreClick(View view) {
-        Intent takenPurchaseActivity = new Intent(TakenActivity.this, TakenSellStoreActivity.class);
-        takenPurchaseActivity.putExtra("key", key);
+        Intent takenPurchaseActivity =
+                new Intent(TakenActivity.this, TakenSellActivity.class);
+        takenPurchaseActivity.putExtra(Constants.KEY, key);
         startActivity(takenPurchaseActivity);
     }
 
     public void billingClick(View view) {
         Intent takenBillingActivity =
-                new Intent(TakenActivity.this, TakenBillingStoreActivity.class);
-        /*Intent takenBillingActivity =
-                new Intent(TakenActivity.this, TakenBillingActivity.class);*/
-        takenBillingActivity.putExtra("key", key);
+                new Intent(TakenActivity.this, TakenBillingActivity.class);
+        takenBillingActivity.putExtra(Constants.KEY, key);
         startActivity(takenBillingActivity);
     }
 
     public void viewStockClick(View view) {
-        Intent viewStockActivity = new Intent(TakenActivity.this, ViewStockActivity.class);
-        viewStockActivity.putExtra("key", key);
+        Intent viewStockActivity =
+                new Intent(TakenActivity.this, ViewStockActivity.class);
+        viewStockActivity.putExtra(Constants.KEY, key);
         startActivity(viewStockActivity);
     }
 
     public void closeClick(View view) {
-        FireBaseAPI.takenDBRef.child(key).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                try {
-                    if (dataSnapshot.getValue() != null) {
-                        HashMap<String, Object> taken = (HashMap<String, Object>) dataSnapshot.getValue();
-                        taken.put("process", "close");
-                        FireBaseAPI.takenDBRef.child(key).updateChildren(taken);
+        FirebaseFirestore dbStore = FirebaseFirestore.getInstance();
+        dbStore.collection(Constants.TAKEN)
+                .document(key)
+                .update(Constants.TAKEN_PROCESS, Constants.CLOSED)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            Toast.makeText(TakenActivity.this,
+                                    "Sales Closed!",
+                                    Toast.LENGTH_SHORT).show();
+                            finish();
+                        }
                     }
-                } catch (Exception e) {
-                    Log.e("Error", e.getMessage());
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.e("Error", databaseError.getMessage());
-            }
-        });
-        finish();
+                });
     }
 }

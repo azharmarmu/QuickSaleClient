@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.telephony.SmsMessage;
 import android.util.Log;
 
@@ -12,8 +13,6 @@ import android.util.Log;
  */
 @SuppressWarnings("deprecation")
 public class SMSReceiver extends BroadcastReceiver {
-
-    private static SMSListener mListener;
 
     public void onReceive(Context context, Intent intent) {
         Bundle myBundle = intent.getExtras();
@@ -31,7 +30,9 @@ public class SMSReceiver extends BroadcastReceiver {
                         String OTP = messages[i].getMessageBody();
                         OTP = OTP.replaceAll("\\D+", "");
                         if (OTP.matches(".*\\d+.*")) {
-                            mListener.messageReceived(OTP);
+                            Intent myIntent = new Intent("otp");
+                            myIntent.putExtra("message",OTP);
+                            LocalBroadcastManager.getInstance(context).sendBroadcast(myIntent);
                         }
                     }
                 }
@@ -39,9 +40,5 @@ public class SMSReceiver extends BroadcastReceiver {
         } catch (Exception e) {
             Log.e("Error", e.getMessage());
         }
-    }
-
-    public static void bindListener(SMSListener listener) {
-        mListener = listener;
     }
 }

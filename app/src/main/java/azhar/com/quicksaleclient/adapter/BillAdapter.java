@@ -20,7 +20,7 @@ import java.util.List;
 
 import azhar.com.quicksaleclient.R;
 import azhar.com.quicksaleclient.activity.PrintActivity;
-import azhar.com.quicksaleclient.api.FireBaseAPI;
+import azhar.com.quicksaleclient.api.TakenApi;
 import azhar.com.quicksaleclient.model.BillModel;
 import azhar.com.quicksaleclient.utils.Constants;
 
@@ -53,19 +53,20 @@ public class BillAdapter extends RecyclerView.Adapter<BillAdapter.MyViewHolder> 
     public void onBindViewHolder(final MyViewHolder holder, final int position) {
         final BillModel billModel = billList.get(position);
         final HashMap<String, Object> soldOrders = billModel.getBillMap();
-        holder.billName.setText((String) soldOrders.get("customer_name"));
+        HashMap<String, Object> customer = (HashMap<String, Object>) soldOrders.get(Constants.CUSTOMER);
+        holder.billName.setText((String) customer.get(Constants.CUSTOMER_NAME));
 
-        holder.billStart.setText("Print");
-        holder.billClose.setText("Delete");
+        holder.billStart.setText(R.string.print);
+        holder.billClose.setText(R.string.delete);
 
         holder.billStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 //// TODO: 30/9/17  edit has to be done
                 Intent intent = new Intent(context, PrintActivity.class);
-                intent.putExtra("key", billModel.getName());
-                intent.putExtra("bill_no", (String) soldOrders.get("bill_no"));
-                intent.putExtra("sold_orders", soldOrders);
+                intent.putExtra(Constants.KEY, billModel.getName());
+                intent.putExtra(Constants.BILL_NO, (String) soldOrders.get(Constants.BILL_NO));
+                intent.putExtra(Constants.BILL_SALES, soldOrders);
                 context.startActivity(intent);
             }
         });
@@ -74,14 +75,14 @@ public class BillAdapter extends RecyclerView.Adapter<BillAdapter.MyViewHolder> 
             @Override
             public void onClick(View view) {
                 FirebaseFirestore dbStore = FirebaseFirestore.getInstance();
-                dbStore.collection(Constants.SALES_MAN_BILLING)
+                dbStore.collection(Constants.BILLING)
                         .document(billModel.getName())
                         .delete().addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
                             Toast.makeText(context,
-                                    "Amount added successfully!",
+                                    "Bill deleted successfully!",
                                     Toast.LENGTH_SHORT).show();
                             billList.remove(position);
                             re_AddItemsToStock(billModel);
@@ -96,19 +97,45 @@ public class BillAdapter extends RecyclerView.Adapter<BillAdapter.MyViewHolder> 
 
     private void re_AddItemsToStock(BillModel billModel) {
         HashMap<String, Object> bill = billModel.getBillMap();
-        HashMap<String, Object> itemStock = (HashMap<String, Object>) bill.get("sold_items");
-        HashMap<String, Object> takenMap = (HashMap<String, Object>) FireBaseAPI.taken.get(billModel.getKey());
-        HashMap<String, Object> orders = new HashMap<>();
-        HashMap<String, Object> qtyLeft = (HashMap<String, Object>) takenMap.get("sales_order_qty_left");
+        HashMap<String, Object> takenMap = (HashMap<String, Object>) TakenApi.taken.get(billModel.getKey());
+        HashMap<String, Object> updatedTaken = new HashMap<>();
 
-        for (String itemKey : itemStock.keySet()) {
-                int itemVal = Integer.parseInt(itemStock.get(itemKey).toString());
-                int qtyVal = Integer.parseInt(qtyLeft.get(itemKey).toString());
+        HashMap<String, Object> takenSales = (HashMap<String, Object>) takenMap.get(Constants.TAKEN_SALES);
+        HashMap<String, Object> billSales = (HashMap<String, Object>) bill.get(Constants.BILL_SALES);
 
-            orders.put(itemKey, String.valueOf(itemVal + qtyVal));
+        for (String itemKey : takenSales.keySet()) {
+            if (billSales.containsKey(itemKey)) {
+                HashMap<String, Object> stockItems = (HashMap<String, Object>) takenSales.get(itemKey);
+                HashMap<String, Object> soldItems = (HashMap<String, Object>) billSales.get(itemKey);
+                int left = Integer.parseInt(stockItems.get(Constants.TAKEN_SALES_QTY_STOCK).toString());
+                int sold = Integer.parseInt(soldItems.get(Constants.TAKEN_SALES_QTY).toString());
+                String available = String.valueOf(left + sold);
+                HashMap<String, Object> itemDetails = new HashMap<>();
+                itemDetails.put(Constants.TAKEN_SALES_PRODUCT_NAME, itemKey);
+                itemDetails.put(Constants.TAKEN_SALES_QTY_STOCK, available);
+                itemDetails.put(Constants.TAKEN_SALES_QTY, stockItems.get(Constants.TAKEN_SALES_QTY).toString());
+                updatedTaken.put(itemKey, itemDetails);
+            }
         }
 
-        FireBaseAPI.takenDBRef.child(billModel.getKey()).child("sales_order_qty_left").updateChildren(orders);
+        //TakenApi.takenDBRef.child(billModel.getKey()).child("sales_order_qty_left").updateChildren(orders);
+
+        FirebaseFirestore dbStore = FirebaseFirestore.getInstance();
+        dbStore.collection(Constants.TAKEN)
+                .document(billModel.getKey())
+                .update(Constants.TAKEN_SALES, updatedTaken)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            Toast.makeText(context,
+                                    "Taken re-added!",
+                                    Toast.LENGTH_SHORT).show();
+
+                        }
+                    }
+                });
+
     }
 
     @Override

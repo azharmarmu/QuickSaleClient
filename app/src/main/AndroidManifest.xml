@@ -42,12 +42,6 @@
             android:name="azhar.com.quicksaleclient.activity.ViewStockActivity"
             android:windowSoftInputMode="stateHidden" />
         <activity
-            android:name="azhar.com.quicksaleclient.activity.TakenBillingActivity"
-            android:windowSoftInputMode="stateHidden" />
-        <activity
-            android:name="azhar.com.quicksaleclient.activity.TakenSellActivity"
-            android:windowSoftInputMode="stateHidden" />
-        <activity
             android:name="azhar.com.quicksaleclient.activity.CreateOrderActivity"
             android:windowSoftInputMode="stateHidden" />
         <activity
@@ -68,8 +62,8 @@
         <activity
             android:name="azhar.com.quicksaleclient.activity.PrintActivity"
             android:windowSoftInputMode="stateHidden" />
-        <activity android:name="azhar.com.quicksaleclient.activity.TakenSellStoreActivity" />
-        <activity android:name="azhar.com.quicksaleclient.activity.TakenBillingStoreActivity" />
+        <activity android:name="azhar.com.quicksaleclient.activity.TakenSellActivity" />
+        <activity android:name="azhar.com.quicksaleclient.activity.TakenBillingActivity" />
     </application>
 
 </manifest>

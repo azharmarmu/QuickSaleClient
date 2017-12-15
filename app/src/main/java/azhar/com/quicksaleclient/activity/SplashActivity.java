@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 
 import azhar.com.quicksaleclient.api.BillNoApi;
 import azhar.com.quicksaleclient.api.CustomerApi;
+import azhar.com.quicksaleclient.api.OrderNoApi;
 import azhar.com.quicksaleclient.api.ProductsApi;
 import azhar.com.quicksaleclient.api.SalesManApi;
 import azhar.com.quicksaleclient.api.UsersApi;
@@ -22,8 +23,8 @@ public class SplashActivity extends AppCompatActivity {
         new CustomerApi().getCustomer(); //calling Customer Api
         new UsersApi().getUsers(); //calling Users Api
         new BillNoApi().getBillNo(); //calling BillNo Api
-        new ProductsApi().getProductPrice(); //calling Products Price Api
-        new ProductsApi().getProductHSN(); //calling Products Price Api
+        new OrderNoApi().getOrderNo(); //calling OrderNo Api
+        new ProductsApi().getProducts(); //calling Products Api
 
         new Handler().postDelayed(new Runnable() {
             @Override

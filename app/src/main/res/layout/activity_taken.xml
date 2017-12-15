@@ -15,20 +15,6 @@
         android:layout_marginTop="16dp"
         android:background="@drawable/box_white_thick_border_corner_ripple"
         android:gravity="center"
-        android:onClick="purchaseClick"
-        android:padding="16dp"
-        android:text="Billing"
-        android:textColor="@color/colorBlack"
-        android:textSize="20sp" />
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginTop="16dp"
-        android:background="@drawable/box_white_thick_border_corner_ripple"
-        android:gravity="center"
         android:onClick="billingClick"
         android:padding="16dp"
         android:text="@string/view_bills"

@@ -9,7 +9,6 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
 
-import azhar.com.quicksaleclient.listeners.CustomerListener;
 import azhar.com.quicksaleclient.utils.Constants;
 
 import static azhar.com.quicksaleclient.api.FireBaseAPI.ENVIRONMENT;
@@ -20,7 +19,7 @@ import static azhar.com.quicksaleclient.api.FireBaseAPI.ENVIRONMENT;
 
 @SuppressWarnings("unchecked")
 public class CustomerApi {
-    public static DatabaseReference customerDBRef = ENVIRONMENT.child(Constants.CUSTOMER);
+    private static DatabaseReference customerDBRef = ENVIRONMENT.child(Constants.CUSTOMER);
     public static HashMap<String, Object> customer = new HashMap<>();
 
     public void getCustomer() {
@@ -31,7 +30,6 @@ public class CustomerApi {
                 try {
                     if (dataSnapshot.getValue() != null) {
                         customer = (HashMap<String, Object>) dataSnapshot.getValue();
-                        customerListener.getCustomer(customer);
                     } else {
                         customer.clear();
                     }
@@ -47,9 +45,4 @@ public class CustomerApi {
         });
     }
 
-    private static CustomerListener customerListener;
-
-    public void setCustomerListener(CustomerListener customerListener) {
-        CustomerApi.customerListener = customerListener;
-    }
 }

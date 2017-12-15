@@ -7,31 +7,33 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 
 import azhar.com.quicksaleclient.utils.Constants;
 
 import static azhar.com.quicksaleclient.api.FireBaseAPI.ENVIRONMENT;
 
 /**
- * Created by azharuddin on 22/11/17.
+ * Created by azharuddin on 26/11/17.
  */
 
 @SuppressWarnings("unchecked")
-public class ProductsApi {
-    public static DatabaseReference productDBRef = ENVIRONMENT.child(Constants.PRODUCTS);
-    public static HashMap<String, Object> products = new HashMap<>();
+public class OrderNoApi {
+    public static DatabaseReference orderNoDBRef = ENVIRONMENT.child(Constants.ORDER_NO);
 
-    public void getProducts() {
-        productDBRef.keepSynced(true);
-        productDBRef.addValueEventListener(new ValueEventListener() {
+    public static List<Integer> orderNo = new ArrayList<>();
+
+    public void getOrderNo() {
+        orderNoDBRef.keepSynced(true);
+        orderNoDBRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 try {
                     if (dataSnapshot.getValue() != null) {
-                        products = (HashMap<String, Object>) dataSnapshot.getValue();
+                        orderNo = (List<Integer>) dataSnapshot.getValue();
                     } else {
-                        products.clear();
+                        orderNo.clear();
                     }
                 } catch (Exception e) {
                     e.printStackTrace();

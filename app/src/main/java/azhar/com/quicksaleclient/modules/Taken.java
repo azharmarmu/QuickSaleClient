@@ -1,171 +1,132 @@
 package azhar.com.quicksaleclient.modules;
 
 import android.annotation.SuppressLint;
-import android.app.DatePickerDialog;
-import android.content.Context;
+import android.app.Activity;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
-import android.widget.DatePicker;
 import android.widget.TextView;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 
 import azhar.com.quicksaleclient.R;
+import azhar.com.quicksaleclient.activity.LandingActivity;
 import azhar.com.quicksaleclient.adapter.TakenAdapter;
-import azhar.com.quicksaleclient.api.FireBaseAPI;
+import azhar.com.quicksaleclient.api.TakenApi;
+import azhar.com.quicksaleclient.listeners.DateListener;
 import azhar.com.quicksaleclient.model.TakenModel;
-
+import azhar.com.quicksaleclient.utils.Constants;
+import azhar.com.quicksaleclient.utils.DateUtils;
+import azhar.com.quicksaleclient.utils.DialogUtils;
+import azhar.com.quicksaleclient.utils.Persistance;
 
 /**
  * Created by azharuddin on 25/7/17.
  */
+
+
+@SuppressWarnings("unchecked")
 @SuppressLint("SimpleDateFormat")
-@SuppressWarnings({"deprecation", "unchecked"})
-public class Taken {
+public class Taken implements DateListener {
 
-    private static List<TakenModel> takenList;
+    private List<TakenModel> takenList = new ArrayList<>();
 
-    public static void evaluate(final Context context, View itemView) {
+    private Activity activity;
+    private View itemView;
+    private TextView datePicker;
+
+    public void evaluate(LandingActivity activity, View itemView) {
 
         try {
-            final TextView datePicker = itemView.findViewById(R.id.et_date_picker);
 
-            Date currentDate = new Date();
-            Calendar calendar = new GregorianCalendar();
-            calendar.setTime(currentDate);
-            int year = calendar.get(Calendar.YEAR);
-            int month = calendar.get(Calendar.MONTH) + 1;
-            int day = calendar.get(Calendar.DAY_OF_MONTH);
+            this.activity = activity;
+            this.itemView = itemView;
 
-            if (month <= 9) {
-                datePicker.setText(day + "/" + "0" + (month) + "/" + year);
-            } else {
-                datePicker.setText(day + "/" + (month) + "/" + year);
-            }
-            SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
-            Date pickedDate = formatter.parse(datePicker.getText().toString());
+            initViews();
 
+            new DateUtils().dateListener(this);
+            new DateUtils().currentDate(datePicker);
+            new DateUtils().datePicker(activity, datePicker, Constants.TAKEN);
 
-            changeMapToList(context, itemView, pickedDate);
+            changeMapToList(datePicker.getText().toString());
         } catch (ParseException e) {
             e.printStackTrace();
         }
-
-        datePicker(context, itemView);
     }
 
-    private static void changeMapToList(final Context context, final View itemView, final Date pickedDate) {
+    private void initViews() {
+        datePicker = itemView.findViewById(R.id.et_date_picker);
+    }
 
-        FireBaseAPI.takenDBRef.keepSynced(true);
-        FireBaseAPI.takenDBRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                try {
-                    if (dataSnapshot.getValue() != null) {
-                        FireBaseAPI.taken = (HashMap<String, Object>) dataSnapshot.getValue();
-                        HashMap<String, Object> taken = FireBaseAPI.taken;
-                        takenList = new ArrayList<>();
-                        if (taken != null) {
-                            for (String key : taken.keySet()) {
-                                HashMap<String, Object> takenOrder = (HashMap<String, Object>) taken.get(key);
-                                SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+    private void changeMapToList(String pickedDate) {
+        DialogUtils.showProgressDialog(activity, activity.getString(R.string.loading));
+        FirebaseFirestore.getInstance()
+                .collection(Constants.TAKEN)
+                .whereEqualTo(Constants.TAKEN_DATE, pickedDate)
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    TextView noTaken = itemView.findViewById(R.id.no_view);
+                    RecyclerView takenView = itemView.findViewById(R.id.rv_taken);
 
-                                Date salesDate = formatter.parse(takenOrder.get("sales_date").toString());
-                                if (pickedDate.compareTo(salesDate) == 0) {
-                                    takenList.add(new TakenModel(key, takenOrder));
-                                }
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot value,
+                                        @Nullable FirebaseFirestoreException e) {
+                        DialogUtils.dismissProgressDialog();
+                        if (e != null) {
+                            Log.w("Error", "Listen failed.", e);
+                            return;
+                        }
+
+                        TakenApi.taken.clear();
+                        takenList.clear();
+                        assert value != null;
+                        for (DocumentSnapshot document : value) {
+                            Log.d(activity.getString(R.string.result),
+                                    document.getId() + " => " + document.getData());
+                            HashMap<String, Object> takenDetails = (HashMap<String, Object>) document.getData();
+                            List<String> salesMan = (List<String>) takenDetails.get(Constants.TAKEN_SALES_MAN_NAME);
+                            String myName = Persistance.getUserData(Constants.MY_NAME, activity);
+
+                            if (salesMan.contains(myName)) {
+                                takenList.add(new TakenModel(document.getId(), takenDetails));
+                                TakenApi.taken.put(document.getId(), takenDetails);
                             }
                         }
-                        populateTaken(context, itemView);
-                    } else {
-                        FireBaseAPI.taken.clear();
+                        if (takenList.size() > 0) {
+                            noTaken.setVisibility(View.GONE);
+                            takenView.setVisibility(View.VISIBLE);
+                            populateTaken();
+                        } else {
+                            noTaken.setVisibility(View.VISIBLE);
+                            takenView.setVisibility(View.GONE);
+                        }
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-                Log.e("FireError", databaseError.getMessage());
-            }
-        });
+                });
     }
 
-    @SuppressLint("SimpleDateFormat")
-    private static void datePicker(final Context context, final View itemView) {
-        final TextView datePicker = itemView.findViewById(R.id.et_date_picker);
-
-        datePicker.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                final Calendar c = Calendar.getInstance();
-                final int mYear = c.get(Calendar.YEAR);
-                final int mMonth = c.get(Calendar.MONTH);
-                final int mDay = c.get(Calendar.DAY_OF_MONTH);
-
-                DatePickerDialog datePickerDialog = new DatePickerDialog(context,
-                        new DatePickerDialog.OnDateSetListener() {
-
-                            @Override
-                            public void onDateSet(DatePicker view, int year,
-                                                  int monthOfYear, int dayOfMonth) {
-                                String pYear = String.valueOf(year);
-                                String pMonth = String.valueOf(monthOfYear + 1);
-                                String pDay = String.valueOf(dayOfMonth);
-
-                                String cYear = String.valueOf(mYear);
-                                String cMonth = String.valueOf(mMonth + 1);
-                                String cDay = String.valueOf(mDay);
-
-                                SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
-                                try {
-                                    Date pickedDate = formatter.parse((pDay + "-" + pMonth + "-" + pYear));
-                                    Date currentDate = formatter.parse((cDay + "-" + cMonth + "-" + cYear));
-                                    if (pickedDate.compareTo(currentDate) <= 0) {
-                                        if ((monthOfYear + 1) <= 9) {
-                                            datePicker.setText(dayOfMonth + "/0" + (monthOfYear + 1) + "/" + year);
-                                        } else {
-                                            datePicker.setText(dayOfMonth + "/" + (monthOfYear + 1) + "/" + year);
-                                        }
-                                        datePicker.clearFocus();
-                                        changeMapToList(context, itemView, pickedDate);
-                                    } else {
-                                        datePicker.setError("Choose Valid date");
-                                    }
-                                } catch (ParseException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        }, mYear, mMonth, mDay);
-                datePickerDialog.show();
-            }
-        });
-    }
-
-    private static void populateTaken(Context context, View itemView) {
-
-        TakenAdapter adapter = new TakenAdapter(context, takenList);
+    private void populateTaken() {
+        TakenAdapter adapter = new TakenAdapter(activity, takenList);
         RecyclerView takenView = itemView.findViewById(R.id.rv_taken);
         takenView.removeAllViews();
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(context);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(activity);
         takenView.setLayoutManager(layoutManager);
         takenView.setItemAnimator(new DefaultItemAnimator());
         takenView.setAdapter(adapter);
+    }
+
+    @Override
+    public void getDate(String date) {
+        changeMapToList(date);
     }
 }

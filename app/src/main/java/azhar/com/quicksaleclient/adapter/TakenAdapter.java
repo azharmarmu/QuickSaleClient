@@ -1,22 +1,29 @@
 package azhar.com.quicksaleclient.adapter;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
 import java.util.List;
 
 import azhar.com.quicksaleclient.R;
 import azhar.com.quicksaleclient.activity.TakenActivity;
-import azhar.com.quicksaleclient.api.TakenApi;
 import azhar.com.quicksaleclient.model.TakenModel;
+import azhar.com.quicksaleclient.utils.Constants;
+import azhar.com.quicksaleclient.utils.DialogUtils;
+import azhar.com.quicksaleclient.utils.Persistance;
 
 
 /**
@@ -42,46 +49,81 @@ public class TakenAdapter extends RecyclerView.Adapter<TakenAdapter.MyViewHolder
         return new TakenAdapter.MyViewHolder(itemView);
     }
 
-    @SuppressLint({"RecyclerView", "SetTextI18n"})
     @Override
     public void onBindViewHolder(final MyViewHolder holder, final int position) {
         final TakenModel taken = takenList.get(position);
         final HashMap<String, Object> takenMap = taken.getTakenMap();
-        holder.takenName.setText("");
-        holder.takenName.append(takenMap.get("sales_man_name").toString() +
-                " / " +
-                takenMap.get("sales_route").toString());
 
-        if (takenMap.get("process").toString().equalsIgnoreCase("start")) {
-            holder.takenStart.setText("Start");
-        } else if (takenMap.get("process").toString().equalsIgnoreCase("started")) {
-            holder.takenStart.setText("Continue");
+        final List<String> salesMan = (List<String>) takenMap.get(Constants.TAKEN_SALES_MAN_NAME);
+
+        holder.takenName.setText("");
+        holder.takenName.append("Sales Man : "
+                + takenMap.get(Constants.TAKEN_SALES_MAN_NAME)
+                + "\n"
+                + "Route : " + salesMan);
+
+        if (takenMap.get(Constants.TAKEN_PROCESS).toString()
+                .equalsIgnoreCase(Constants.START)) {
+            holder.takenStart.setText(R.string._start);
+        } else if (takenMap.get(Constants.TAKEN_PROCESS).toString()
+                .equalsIgnoreCase(Constants.STARTED)) {
+            holder.takenStart.setText(R.string._continue);
         } else {
             holder.takenStart.setVisibility(View.GONE);
             holder.takenClose.setLayoutParams(new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.MATCH_PARENT));
-            holder.takenClose.setText("Closed");
+            holder.takenClose.setText(Constants.CLOSED);
             holder.takenClose.setClickable(false);
         }
 
         holder.takenStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                TakenApi.takenDBRef.child(taken.getKey()).child("process").setValue("started");
-
-                Intent editIntent = new Intent(context, TakenActivity.class);
-                editIntent.putExtra("key", taken.getKey());
-                editIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                context.startActivity(editIntent);
+                String myName = Persistance.getUserData(Constants.MY_NAME, context);
+                if (salesMan.contains(myName)) {
+                    FirebaseFirestore dbStore = FirebaseFirestore.getInstance();
+                    dbStore.collection(Constants.TAKEN)
+                            .document(taken.getKey())
+                            .update(Constants.TAKEN_PROCESS, Constants.STARTED)
+                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if (task.isSuccessful()) {
+                                        Toast.makeText(context,
+                                                "Sales Started!",
+                                                Toast.LENGTH_SHORT).show();
+                                        Intent editIntent = new Intent(context, TakenActivity.class);
+                                        editIntent.putExtra(Constants.KEY, taken.getKey());
+                                        editIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                        context.startActivity(editIntent);
+                                    }
+                                }
+                            });
+                } else {
+                    DialogUtils.appToastShort(context, "You can start this route");
+                }
             }
         });
 
         holder.takenClose.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                TakenApi.takenDBRef.child(taken.getKey()).child("process").setValue("close");
+
+                FirebaseFirestore dbStore = FirebaseFirestore.getInstance();
+                dbStore.collection(Constants.TAKEN)
+                        .document(taken.getKey())
+                        .update(Constants.TAKEN_PROCESS, Constants.CLOSED)
+                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if (task.isSuccessful()) {
+                                    Toast.makeText(context,
+                                            "Sales Closed!",
+                                            Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
             }
         });
 

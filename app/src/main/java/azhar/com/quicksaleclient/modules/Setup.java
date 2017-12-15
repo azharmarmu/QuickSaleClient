@@ -1,8 +1,7 @@
 package azhar.com.quicksaleclient.modules;
 
-import android.content.Context;
+import android.app.Activity;
 import android.text.InputType;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,14 +9,12 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
-
 import java.util.HashMap;
 
 import azhar.com.quicksaleclient.R;
-import azhar.com.quicksaleclient.api.FireBaseAPI;
+import azhar.com.quicksaleclient.activity.LandingActivity;
+import azhar.com.quicksaleclient.api.ProductsApi;
+import azhar.com.quicksaleclient.utils.Constants;
 
 
 /**
@@ -26,36 +23,27 @@ import azhar.com.quicksaleclient.api.FireBaseAPI;
 
 @SuppressWarnings({"deprecation", "unchecked"})
 public class Setup {
-    private static HashMap<String, Object> productPrice = new HashMap<>();
+    private HashMap<String, Object> products = new HashMap<>();
 
-    public static void evaluate(final Context context, final View itemView) {
-        FireBaseAPI.productDBRef.keepSynced(true);
-        FireBaseAPI.productDBRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.getValue() != null) {
-                    FireBaseAPI.productPrice = (HashMap<String, Object>) dataSnapshot.getValue();
-                    productPrice = FireBaseAPI.productPrice;
-                    populateTable(context, itemView);
-                } else {
-                    FireBaseAPI.productPrice.clear();
-                }
-            }
+    private Activity activity;
+    private View itemView;
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.e("FireError", databaseError.getMessage());
-            }
-        });
+    public void evaluate(LandingActivity activity, final View itemView) {
+
+        this.activity = activity;
+        this.itemView = itemView;
+
+        products = ProductsApi.products;
+        populateTable();
     }
 
-    private static void populateTable(Context context, View itemView) {
+    private void populateTable() {
         TableLayout tableLayout = itemView.findViewById(R.id.table_layout);
         tableLayout.removeAllViews();
-        for (String prodKey : productPrice.keySet()) {
+        for (String prodKey : products.keySet()) {
             /* Create a TableRow dynamically */
-            TableRow tr = new TableRow(context);
-            tr.setBackgroundColor(context.getResources().getColor(R.color.colorLightWhite));
+            TableRow tr = new TableRow(activity);
+            tr.setBackgroundColor(activity.getResources().getColor(R.color.colorLightWhite));
 
             tr.setLayoutParams(new TableRow.LayoutParams(
                     TableRow.LayoutParams.MATCH_PARENT,
@@ -70,28 +58,30 @@ public class Setup {
             params.weight = 1.0f;
 
 
-        /* Product Name --> EditText */
-            TextView name = new TextView(context);
+            HashMap<String, Object> productDetails = (HashMap<String, Object>) products.get(prodKey);
+
+            /* Product Name --> EditText */
+            TextView name = new TextView(activity);
             name.setLayoutParams(params);
 
-            name.setTextColor(context.getResources().getColor(R.color.colorLightBlack));
+            name.setTextColor(activity.getResources().getColor(R.color.colorLightBlack));
             name.setPadding(16, 16, 16, 16);
             name.setText(prodKey.replace("_", "/"));
             name.setGravity(Gravity.CENTER);
-            name.setBackgroundColor(context.getResources().getColor(android.R.color.transparent));
+            name.setBackgroundColor(activity.getResources().getColor(android.R.color.transparent));
             tr.addView(name);
 
 
-        /* Product Price --> EditText */
-            TextView rate = new TextView(context);
+            /* Product Price --> EditText */
+            TextView rate = new TextView(activity);
             rate.setLayoutParams(params);
 
-            rate.setTextColor(context.getResources().getColor(R.color.colorLightBlack));
+            rate.setTextColor(activity.getResources().getColor(R.color.colorLightBlack));
             rate.setPadding(16, 16, 16, 16);
-            rate.setText(productPrice.get(prodKey).toString());
+            rate.setText((String) productDetails.get(Constants.PRODUCT_RATE));
             rate.setGravity(Gravity.CENTER);
             rate.setInputType(InputType.TYPE_CLASS_NUMBER);
-            rate.setBackgroundColor(context.getResources().getColor(android.R.color.transparent));
+            rate.setBackgroundColor(activity.getResources().getColor(android.R.color.transparent));
             tr.addView(rate); // Adding textView to table-row.
 
             // Add the TableRow to the TableLayout

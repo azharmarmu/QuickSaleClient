@@ -1,7 +1,7 @@
 package azhar.com.quicksaleclient.activity;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
 import android.view.Gravity;
 import android.view.ViewGroup;
@@ -12,7 +12,8 @@ import android.widget.TextView;
 import java.util.HashMap;
 
 import azhar.com.quicksaleclient.R;
-import azhar.com.quicksaleclient.api.FireBaseAPI;
+import azhar.com.quicksaleclient.api.TakenApi;
+import azhar.com.quicksaleclient.utils.Constants;
 
 
 @SuppressWarnings({"unchecked", "deprecation"})
@@ -28,10 +29,10 @@ public class ViewStockActivity extends AppCompatActivity {
         Bundle extras = getIntent().getExtras();
 
         if (extras != null) {
-            key = (String) extras.get("key");
-            for (String my_key : FireBaseAPI.taken.keySet()) {
+            key = (String) extras.get(Constants.KEY);
+            for (String my_key : TakenApi.taken.keySet()) {
                 if (key.equals(my_key)) {
-                    takenMap = (HashMap<String, Object>) FireBaseAPI.taken.get(key);
+                    takenMap = (HashMap<String, Object>) TakenApi.taken.get(key);
                     break;
                 }
             }
@@ -41,11 +42,10 @@ public class ViewStockActivity extends AppCompatActivity {
     }
 
     private void populateTable() {
-        TableLayout tableLayout = (TableLayout) findViewById(R.id.table_layout);
-        HashMap<String, Object> productTakenDetails = (HashMap<String, Object>) takenMap.get("sales_order_qty");
-        HashMap<String, Object> productLeftDetails = (HashMap<String, Object>) takenMap.get("sales_order_qty_left");
+        TableLayout tableLayout = findViewById(R.id.table_layout);
+        HashMap<String, Object> sales = (HashMap<String, Object>) takenMap.get(Constants.TAKEN_SALES);
         tableLayout.removeAllViews();
-        for (String prodKey : productTakenDetails.keySet()) {
+        for (String prodKey : sales.keySet()) {
             /* Create a TableRow dynamically */
             TableRow tr = new TableRow(getApplicationContext());
                 tr.setBackgroundColor(getApplicationContext().getResources().getColor(R.color.colorLightWhite));
@@ -62,8 +62,10 @@ public class ViewStockActivity extends AppCompatActivity {
 
             params.weight = 1.0f;
 
-            int takenQty = Integer.parseInt(productTakenDetails.get(prodKey).toString());
-            int leftQty = Integer.parseInt(productLeftDetails.get(prodKey).toString());
+            HashMap<String,Object> salesDetails = (HashMap<String, Object>) sales.get(prodKey);
+
+            int takenQty = Integer.parseInt(salesDetails.get(Constants.TAKEN_SALES_QTY).toString());
+            int leftQty = Integer.parseInt(salesDetails.get(Constants.TAKEN_SALES_QTY_STOCK).toString());
             int soldQty = takenQty - leftQty;
 
 

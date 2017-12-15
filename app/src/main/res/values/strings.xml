@@ -37,7 +37,6 @@
     <string name="print_line">"--------------------------------"  </string>
     <string name="print_cust">"------- Customer Details -------"  </string>
     <string name="none_paired">No devices have been paired</string>
-    <string name="print">Print</string>
     <string name="bt_not_enabled_leaving">Bluetooth is not enabled</string>
     <string name="title_paired_devices">Paired Devices</string>
     <string name="title_other_devices">Other Available Devices</string>
@@ -52,4 +51,18 @@
     <string name="total">Total</string>
     <string name="no_bill">No Bill</string>
     <string name="view_bills">View Bills</string>
+    <string name="_start">Start</string>
+    <string name="_continue">Continue</string>
+    <string name="error">Error</string>
+    <string name="not_valid">Not valid</string>
+    <string name="no_stock">No stock</string>
+    <string name="bill_prefix">RS-</string>
+    <string name="loading">Loading…</string>
+    <string name="nil">NIL</string>
+    <string name="connect_printer">Connect Printer</string>
+    <string name="_dir">QS_POS</string>
+    <string name="result">result</string>
+    <string name="print">Print</string>
+    <string name="delete">Delete</string>
+    <string name="dateformat">dd-MM-yyyy</string>
 </resources>
