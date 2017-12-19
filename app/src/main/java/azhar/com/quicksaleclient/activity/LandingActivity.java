@@ -17,7 +17,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import azhar.com.quicksaleclient.R;
-import azhar.com.quicksaleclient.modules.Billing;
 import azhar.com.quicksaleclient.modules.Order;
 import azhar.com.quicksaleclient.modules.Setup;
 import azhar.com.quicksaleclient.modules.Taken;
@@ -28,7 +27,7 @@ import azhar.com.quicksaleclient.utils.Persistance;
 public class LandingActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    View taken, order, billing, setup;
+    View taken, order, setup;
     public static int whereIam = 0;
 
     TextView salesManName, salesManPhone;
@@ -47,7 +46,6 @@ public class LandingActivity extends AppCompatActivity
 
         taken = findViewById(R.id.taken_holder);
         order = findViewById(R.id.order_holder);
-        billing = findViewById(R.id.billing_holder);
         setup = findViewById(R.id.setup_holder);
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
@@ -93,18 +91,13 @@ public class LandingActivity extends AppCompatActivity
                 getSupportActionBar().setTitle("Order");
             }
             whereIam = 1;
-        } else if (id == R.id.nav_billing) {
-            if (getSupportActionBar() != null) {
-                getSupportActionBar().setTitle("Billing");
-            }
-            whereIam = 2;
         } else if (id == R.id.nav_setup) {
             if (getSupportActionBar() != null) {
                 getSupportActionBar().setTitle("Set-up");
             }
-            whereIam = 3;
+            whereIam = 2;
         } else if (id == R.id.nav_signout) {
-            whereIam = 4;
+            whereIam = 3;
         }
 
         switchScreen();
@@ -116,7 +109,6 @@ public class LandingActivity extends AppCompatActivity
     private void switchScreen() {
         taken.setVisibility(View.GONE);
         order.setVisibility(View.GONE);
-        billing.setVisibility(View.GONE);
         setup.setVisibility(View.GONE);
 
         switch (whereIam) {
@@ -129,14 +121,10 @@ public class LandingActivity extends AppCompatActivity
                 new Order().evaluate(this, order);
                 break;
             case 2:
-                billing.setVisibility(View.VISIBLE);
-                new Billing().evaluate(this, billing);
-                break;
-            case 3:
                 setup.setVisibility(View.VISIBLE);
                 new Setup().evaluate(this, setup);
                 break;
-            case 4:
+            case 3:
                 Constants.AUTH.signOut();
                 startActivity(new Intent(LandingActivity.this, LoginActivity.class));
                 finish();

@@ -56,7 +56,6 @@ public class TakenSellActivity extends AppCompatActivity {
     List<String> salesMan = new ArrayList<>();
     List<Integer> billNo = new ArrayList<>();
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -153,7 +152,7 @@ public class TakenSellActivity extends AppCompatActivity {
 
             productName.setTextColor(getResources().getColor(R.color.colorLightBlack));
             productName.setPadding(16, 16, 16, 16);
-            productName.setText(prodKey);
+            productName.setText(productDetails.get(Constants.PRODUCT_NAME).toString());
             productName.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
             productName.setGravity(Gravity.CENTER);
             tr.addView(productName);
@@ -332,17 +331,18 @@ public class TakenSellActivity extends AppCompatActivity {
                     if (!prodName.isEmpty() && !prodHSN.isEmpty() && !prodQTY.isEmpty() && Integer.parseInt(prodQTY) > 0) {
 
                         HashMap<String, Object> items = new HashMap<>();
-                        items.put(Constants.BILL_SALES_PRODUCT_NAME, prodName);
-                        items.put(Constants.BILL_SALES_PRODUCT_QTY, prodQTY);
-                        items.put(Constants.BILL_SALES_PRODUCT_RATE, prodRate);
-                        items.put(Constants.BILL_SALES_PRODUCT_HSN, prodHSN);
-                        items.put(Constants.BILL_SALES_PRODUCT_TOTAL, prodTotal);
+                        items.put(Constants.PRODUCT_NAME, prodName);
+                        items.put(Constants.PRODUCT_QTY, prodQTY);
+                        items.put(Constants.PRODUCT_RATE, prodRate);
+                        items.put(Constants.PRODUCT_HSN, prodHSN);
+                        items.put(Constants.PRODUCT_TOTAL, prodTotal);
                         sellItems.put(prodName, items);
                     }
                 }
             }
 
-            if (localSalesMan.equals("NIL") || localSalesMan.isEmpty()) {
+            if (localSalesMan.equals(getString(R.string.nil))
+                    || localSalesMan.isEmpty()) {
                 Toast.makeText(getApplicationContext(), "Select Sales Man", Toast.LENGTH_SHORT).show();
             } else if (localCustomerName.isEmpty()) {
                 customerName.setError("Please Enter Customer name");
@@ -375,16 +375,13 @@ public class TakenSellActivity extends AppCompatActivity {
                 soldOrders.put(Constants.BILL_NET_TOTAL, totalView.getText().toString());
                 soldOrders.put(Constants.BILL_ROUTE, takenMap.get(Constants.TAKEN_ROUTE));
 
-
                 final HashMap<String, Object> finalSoldOrders = soldOrders;
                 final HashMap<String, Object> updateLeftStock = updateLeftStock();
                 final int finalNumber = number;
 
-                FirebaseFirestore dbStore = FirebaseFirestore.getInstance();
-
-
                 DialogUtils.showProgressDialog(TakenSellActivity.this, getString(R.string.loading));
-                dbStore.collection(Constants.BILLING)
+
+                FirebaseFirestore.getInstance().collection(Constants.BILLING)
                         .add(finalSoldOrders)
                         .addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
                             @Override
@@ -433,9 +430,8 @@ public class TakenSellActivity extends AppCompatActivity {
 
     }
 
-
     private HashMap<String, Object> updateLeftStock() {
-        HashMap<String, Object> updatedTaken = new HashMap<>();
+        HashMap<String, Object> updatedTaken = itemDetails;
         for (String itemKey : itemDetails.keySet()) {
             if (sellItems.containsKey(itemKey)) {
                 HashMap<String, Object> stockItems = (HashMap<String, Object>) itemDetails.get(itemKey);
@@ -443,11 +439,11 @@ public class TakenSellActivity extends AppCompatActivity {
                 int left = Integer.parseInt(stockItems.get(Constants.TAKEN_SALES_QTY_STOCK).toString());
                 int sold = Integer.parseInt(soldItems.get(Constants.TAKEN_SALES_QTY).toString());
                 String available = String.valueOf(left - sold);
-                HashMap<String, Object> itemDetails = new HashMap<>();
-                itemDetails.put(Constants.TAKEN_SALES_PRODUCT_NAME, itemKey);
-                itemDetails.put(Constants.TAKEN_SALES_QTY_STOCK, available);
-                itemDetails.put(Constants.TAKEN_SALES_QTY, stockItems.get(Constants.TAKEN_SALES_QTY).toString());
-                updatedTaken.put(itemKey, itemDetails);
+                HashMap<String, Object> items = new HashMap<>();
+                items.put(Constants.TAKEN_SALES_PRODUCT_NAME, itemKey);
+                items.put(Constants.TAKEN_SALES_QTY_STOCK, available);
+                items.put(Constants.TAKEN_SALES_QTY, stockItems.get(Constants.TAKEN_SALES_QTY).toString());
+                updatedTaken.put(itemKey, items);
             }
         }
         return updatedTaken;

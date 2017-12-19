@@ -2,8 +2,6 @@ package azhar.com.quicksaleclient.api;
 
 import com.google.firebase.database.DatabaseReference;
 
-import java.util.HashMap;
-
 import azhar.com.quicksaleclient.utils.Constants;
 
 
@@ -13,12 +11,5 @@ import azhar.com.quicksaleclient.utils.Constants;
 
 @SuppressWarnings("unchecked")
 public class FireBaseAPI {
-
     static final DatabaseReference ENVIRONMENT = Constants.DATABASE.getReference(Constants.ENV);
-    
-    public static DatabaseReference orderDBRef = ENVIRONMENT.child(Constants.ORDER);
-    public static DatabaseReference billingDBREf = ENVIRONMENT.child(Constants.BILLING);
-
-    public static HashMap<String, Object> order = new HashMap<>();
-    public static HashMap<String, Object> billing = new HashMap<>();
 }

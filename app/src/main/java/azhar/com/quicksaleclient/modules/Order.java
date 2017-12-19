@@ -74,7 +74,6 @@ public class Order implements DateListener {
     }
 
     private void changeMapToList(String pickedDate) {
-        //Todo need to fetch from CloudStore
         DialogUtils.showProgressDialog(activity, activity.getString(R.string.loading));
         FirebaseFirestore.getInstance()
                 .collection(Constants.ORDER)

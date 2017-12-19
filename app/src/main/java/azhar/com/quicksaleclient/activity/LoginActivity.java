@@ -69,8 +69,8 @@ public class LoginActivity extends AppCompatActivity
             HashMap<String, Object> salesManDetails = (HashMap<String, Object>) salesMan.get(key);
             salesManList.add(
                     new SalesManModel(key,
-                            (String) salesManDetails.get(Constants.SALES_MAN_NAME),
-                            (String) salesManDetails.get(Constants.SALES_MAN_PHONE)
+                            (String) salesManDetails.get(Constants.SALES_MAN_PHONE),
+                            (String) salesManDetails.get(Constants.SALES_MAN_NAME)
                     )
             );
         }
@@ -86,10 +86,9 @@ public class LoginActivity extends AppCompatActivity
         if (!otp.equals("")) {
             DialogUtils.showProgressDialog(LoginActivity.this, "Loading...");
             PhoneAuthCredential credential = PhoneAuthProvider.getCredential(phoneVerificationID, otp);
-            signInWithPhoneAuthCredential(credential, name, phone);
+            signInWithPhoneAuthCredential(credential);
         } else {
             changeMapToList();
-
             boolean isUserExists = false;
 
             for (int i = 0; i < salesManList.size(); i++) {
@@ -120,9 +119,9 @@ public class LoginActivity extends AppCompatActivity
         }
     }
 
-    public void phoneNumberVerification(final String name, final String phoneNumber) {
+    public void phoneNumberVerification() {
         PhoneAuthProvider.getInstance().verifyPhoneNumber(
-                "+91" + phoneNumber,        // Phone number to verify
+                phone,        // Phone number to verify
                 60,                 // Timeout duration
                 TimeUnit.SECONDS,   // Unit of timeout
                 this,               // Activity (for callback binding)
@@ -132,7 +131,7 @@ public class LoginActivity extends AppCompatActivity
                     public void onVerificationCompleted(PhoneAuthCredential credential) {
                         //Instant verification or Auto-retrieval.
                         Log.d("Success", "onVerificationCompleted:" + credential);
-                        signInWithPhoneAuthCredential(credential, name, phoneNumber);
+                        signInWithPhoneAuthCredential(credential);
                     }
 
                     @Override
@@ -183,7 +182,7 @@ public class LoginActivity extends AppCompatActivity
                 });
     }
 
-    private void signInWithPhoneAuthCredential(PhoneAuthCredential phoneAuthCredential, final String name, final String phoneNumber) throws NullPointerException {
+    private void signInWithPhoneAuthCredential(PhoneAuthCredential phoneAuthCredential) throws NullPointerException {
         Constants.AUTH.signInWithCredential(phoneAuthCredential)
                 .addOnCompleteListener((new OnCompleteListener<AuthResult>() {
                     @SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "ConstantConditions"})
@@ -193,7 +192,7 @@ public class LoginActivity extends AppCompatActivity
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Persistance.saveUserData(Constants.MY_NAME, name, LoginActivity.this);
-                            Persistance.saveUserData(Constants.MY_PHONE, phoneNumber, LoginActivity.this);
+                            Persistance.saveUserData(Constants.MY_PHONE, phone, LoginActivity.this);
                             Log.d("Success", "signInWithCredential:success");
                             Intent landingActivity = new Intent(LoginActivity.this, LandingActivity.class);
                             landingActivity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -219,12 +218,12 @@ public class LoginActivity extends AppCompatActivity
 
     @Override
     public void onPermissionGranted(PermissionGrantedResponse response) {
-        phoneNumberVerification(name, phone);
+        phoneNumberVerification();
     }
 
     @Override
     public void onPermissionDenied(PermissionDeniedResponse response) {
-        phoneNumberVerification(name, phone);
+        phoneNumberVerification();
     }
 
     @Override
@@ -245,13 +244,13 @@ public class LoginActivity extends AppCompatActivity
             if (intent.getAction() != null && intent.getAction().equalsIgnoreCase("otp")) {
                 final String messageText = intent.getStringExtra("message");
                 Log.d("Text", messageText);
-                String name = etName.getText().toString();
-                String phone = etPhone.getText().toString();
+                name = etName.getText().toString();
+                phone = etPhone.getText().toString();
                 etOTP.setText(messageText);
                 String code = etOTP.getText().toString();
                 etOTP.setSelection(code.length());
                 PhoneAuthCredential credential = PhoneAuthProvider.getCredential(phoneVerificationID, code);
-                signInWithPhoneAuthCredential(credential, name, phone);
+                signInWithPhoneAuthCredential(credential);
             }
         }
     };

@@ -25,6 +25,7 @@ import azhar.com.quicksaleclient.R;
 import azhar.com.quicksaleclient.adapter.BillAdapter;
 import azhar.com.quicksaleclient.model.BillModel;
 import azhar.com.quicksaleclient.utils.Constants;
+import azhar.com.quicksaleclient.utils.DialogUtils;
 
 @SuppressWarnings("unchecked")
 public class TakenBillingActivity extends AppCompatActivity {
@@ -44,6 +45,7 @@ public class TakenBillingActivity extends AppCompatActivity {
             FirebaseFirestore.getInstance()
                     .collection(Constants.BILLING)
                     .orderBy(Constants.BILL_NO, Query.Direction.ASCENDING)
+                    .whereEqualTo(Constants.BILL_ID, key)
                     .get()
                     .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                         TextView noBill = (TextView) findViewById(R.id.no_bill);
@@ -66,7 +68,10 @@ public class TakenBillingActivity extends AppCompatActivity {
                                 }
                             } else {
                                 noBill.setVisibility(View.VISIBLE);
-                                Log.d(TAG, "Error getting documents: ", task.getException());
+                                if (task.getException() != null) {
+                                    Log.d(TAG, "Error getting documents: ", task.getException());
+                                    DialogUtils.appToastLong(TakenBillingActivity.this, task.getException().getMessage());
+                                }
                             }
                         }
                     });

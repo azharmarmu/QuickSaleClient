@@ -31,7 +31,9 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.mocoo.hang.rtprinter.driver.Contants;
 import com.mocoo.hang.rtprinter.driver.HsBluetoothPrintDriver;
 
@@ -53,7 +55,7 @@ public class PrintActivity extends AppCompatActivity {
     TextView txtPrinterStatus;
     Button mBtnConnectBluetoothDevice;
 
-    private static final String TAG = "BloothPrinterActivity";
+    private static final String TAG = "PrinterActivity";
     private static BluetoothDevice device;
     private AlertDialog.Builder alertDlgBuilder;
     private static final int REQUEST_CONNECT_DEVICE = 1;
@@ -64,6 +66,9 @@ public class PrintActivity extends AppCompatActivity {
     private TextView date, billNo, custName, custGST, netTotal, grossTotal, cgst, sgst;
     private TableLayout tableLayout;
     private RelativeLayout printLayout;
+
+    String key, billNumber;
+    HashMap<String, Object> soldOrders = new HashMap<>();
 
     @Override
     public void onStart() {
@@ -88,16 +93,11 @@ public class PrintActivity extends AppCompatActivity {
                         txtPrinterStatus.append(device.getName());
                     }
                 }
-
             }
         } catch (NullPointerException e) {
             e.printStackTrace();
         }
     }
-
-    String key, billNumber;
-    HashMap<String, Object> soldOrders = new HashMap<>();
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,22 +110,23 @@ public class PrintActivity extends AppCompatActivity {
             billNumber = bundle.getString(Constants.BILL_NO);
             soldOrders = (HashMap<String, Object>) bundle.getSerializable(Constants.BILL_SALES);
 
-            //todo need to get billing amount received from firestore
-            /*FireBaseAPI.billingDBREf.child(key).child(billNumber).child("amountReceived").addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    if (dataSnapshot.getValue() != null) {
-                        EditText etAmountReceived = findViewById(R.id.et_amount_received);
-                        etAmountReceived.setText(dataSnapshot.getValue().toString());
-                    }
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-                    Log.e("Error", databaseError.getMessage());
-                }
-            });*/
-
+            FirebaseFirestore.getInstance()
+                    .collection(Constants.BILLING)
+                    .whereEqualTo(Constants.BILL_NO, billNumber)
+                    .get()
+                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                            if (task.isSuccessful()) {
+                                for (final DocumentSnapshot document : task.getResult()) {
+                                    if (document.contains(Constants.BILL_AMOUNT_RECEIVED)) {
+                                        EditText etAmountReceived = findViewById(R.id.et_amount_received);
+                                        etAmountReceived.setText(document.get(Constants.BILL_AMOUNT_RECEIVED).toString());
+                                    }
+                                }
+                            }
+                        }
+                    });
 
             printLayout = findViewById(R.id.print_layout);
             date = findViewById(R.id.date);
@@ -153,7 +154,6 @@ public class PrintActivity extends AppCompatActivity {
             // If the adapter is null, then Bluetooth is not available in your device
             if (mBluetoothAdapter == null) {
                 Toast.makeText(this, "Bluetooth is not available", Toast.LENGTH_LONG).show();
-                //finish();
             }
         }
 
@@ -209,8 +209,8 @@ public class PrintActivity extends AppCompatActivity {
 
             productName.setTextColor(getResources().getColor(R.color.colorBlack));
             productName.setText("");
-            productName.append(itemsDetails.get(Constants.BILL_SALES_PRODUCT_NAME) +
-                    "(" + itemsDetails.get(Constants.BILL_SALES_PRODUCT_HSN) + ")");
+            productName.append(itemsDetails.get(Constants.PRODUCT_NAME) +
+                    "(" + itemsDetails.get(Constants.PRODUCT_HSN) + ")");
             productName.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
             tr.addView(productName);
 
@@ -219,7 +219,7 @@ public class PrintActivity extends AppCompatActivity {
             productQTY.setLayoutParams(params);
 
             productQTY.setTextColor(getResources().getColor(R.color.colorBlack));
-            productQTY.setText(itemsDetails.get(Constants.BILL_SALES_PRODUCT_QTY).toString());
+            productQTY.setText(itemsDetails.get(Constants.PRODUCT_QTY).toString());
             productQTY.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
             tr.addView(productQTY);
 
@@ -228,7 +228,7 @@ public class PrintActivity extends AppCompatActivity {
             productRate.setLayoutParams(params);
 
             productRate.setTextColor(getResources().getColor(R.color.colorBlack));
-            productRate.setText(itemsDetails.get(Constants.BILL_SALES_PRODUCT_RATE).toString());
+            productRate.setText(itemsDetails.get(Constants.PRODUCT_RATE).toString());
             productRate.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
             tr.addView(productRate);
 
@@ -236,7 +236,7 @@ public class PrintActivity extends AppCompatActivity {
             productQTY.setLayoutParams(params);
 
             productTotal.setTextColor(getResources().getColor(R.color.colorBlack));
-            productTotal.setText(itemsDetails.get(Constants.BILL_SALES_PRODUCT_TOTAL).toString());
+            productTotal.setText(itemsDetails.get(Constants.PRODUCT_TOTAL).toString());
             productTotal.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
             tr.addView(productTotal);
             // Adding textView to table-row.

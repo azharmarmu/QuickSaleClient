@@ -98,7 +98,7 @@ public class BillAdapter extends RecyclerView.Adapter<BillAdapter.MyViewHolder> 
     private void re_AddItemsToStock(BillModel billModel) {
         HashMap<String, Object> bill = billModel.getBillMap();
         HashMap<String, Object> takenMap = (HashMap<String, Object>) TakenApi.taken.get(billModel.getKey());
-        HashMap<String, Object> updatedTaken = new HashMap<>();
+
 
         HashMap<String, Object> takenSales = (HashMap<String, Object>) takenMap.get(Constants.TAKEN_SALES);
         HashMap<String, Object> billSales = (HashMap<String, Object>) bill.get(Constants.BILL_SALES);
@@ -114,7 +114,7 @@ public class BillAdapter extends RecyclerView.Adapter<BillAdapter.MyViewHolder> 
                 itemDetails.put(Constants.TAKEN_SALES_PRODUCT_NAME, itemKey);
                 itemDetails.put(Constants.TAKEN_SALES_QTY_STOCK, available);
                 itemDetails.put(Constants.TAKEN_SALES_QTY, stockItems.get(Constants.TAKEN_SALES_QTY).toString());
-                updatedTaken.put(itemKey, itemDetails);
+                takenSales.put(itemKey, itemDetails);
             }
         }
 
@@ -123,7 +123,7 @@ public class BillAdapter extends RecyclerView.Adapter<BillAdapter.MyViewHolder> 
         FirebaseFirestore dbStore = FirebaseFirestore.getInstance();
         dbStore.collection(Constants.TAKEN)
                 .document(billModel.getKey())
-                .update(Constants.TAKEN_SALES, updatedTaken)
+                .update(Constants.TAKEN_SALES, takenSales)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {

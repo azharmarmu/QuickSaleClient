@@ -16,19 +16,21 @@ import java.util.Date;
 public class Constants {
     public static final FirebaseAuth AUTH = FirebaseAuth.getInstance();
     public static final FirebaseDatabase DATABASE = FirebaseDatabase.getInstance();
-    public static final String ENV = "development";
-    //public static final String ENV = "production";
+    //public static final String ENV = "development";
+    public static final String ENV = "production";
 
     public static final String KEY = "key";
 
-    /*Table Name*/
+    /*RealTime Table Name*/
     public static final String USERS = "users";
-    public static final String TAKEN = "taken";
-    public static final String ORDER = "order";
     public static final String PRODUCTS = "products";
     public static final String SALES_MAN = "sales_man";
     public static final String CUSTOMER = "customer";
-    public static final String BILLING = "billing";
+
+    /*FireStore Table Name*/
+    public static final String BILLING = ENV + "_" + "billing";
+    public static final String TAKEN = ENV + "_" + "taken";
+    public static final String ORDER = ENV + "_" + "order";
 
     public static final String EDIT = "edit";
     public static final String CHECK = "check";
@@ -49,7 +51,6 @@ public class Constants {
     public static final String SALES_MAN_PHONE = "sales_man_phone";
 
     /*Taken-Table */
-    public static final String TAKEN_ID = "_id";
     public static final String TAKEN_PROCESS = "process";
     public static final String TAKEN_DATE = "date";
     public static final String TAKEN_SALES = "sales";
@@ -63,6 +64,8 @@ public class Constants {
     public static final String PRODUCT_NAME = "name";
     public static final String PRODUCT_HSN = "hsn";
     public static final String PRODUCT_RATE = "rate";
+    public static final String PRODUCT_QTY = "qty";
+    public static final String PRODUCT_TOTAL = "total";
 
     /*Customer-Table*/
     public static final String CUSTOMER_NAME = "customer_name";
@@ -76,30 +79,18 @@ public class Constants {
     public static final String BILL_SALES_MAN_NAME = "salesManName";
     public static final String BILL_CUSTOMER = "customer";
     public static final String BILL_SALES = "sales";
-    public static final String BILL_SALES_PRODUCT_NAME = "name";
-    public static final String BILL_SALES_PRODUCT_QTY = "qty";
-    public static final String BILL_SALES_PRODUCT_RATE = "rate";
-    public static final String BILL_SALES_PRODUCT_HSN = "hsn";
-    public static final String BILL_SALES_PRODUCT_TOTAL = "total";
     public static final String BILL_NET_TOTAL = "netTotal";
     public static final String BILL_ROUTE = "route";
     public static final String BILL_AMOUNT_RECEIVED = "amountReceived";
 
     /*Order-Table store*/
     public static final String ORDER_ID = "_id";
-    public static final String ORDER_PROCESS = "process";
     public static final String ORDER_DATE = "date";
     public static final String ORDER_NO = "orderNo";
+    public static final String ORDER_PROCESS = "process";
     public static final String ORDER_SALES_MAN_NAME = "salesManName";
     public static final String ORDER_CUSTOMER = "customer";
-    public static final String ORDER_CUSTOMER_NAME = "customer_name";
-    public static final String ORDER_CUSTOMER_GST = "customer_gst";
     public static final String ORDER_SALES = "sales";
-    public static final String ORDER_SALES_PRODUCT_NAME = "name";
-    public static final String ORDER_SALES_PRODUCT_QTY = "qty";
-    public static final String ORDER_SALES_PRODUCT_RATE = "rate";
-    public static final String ORDER_SALES_PRODUCT_HSN = "hsn";
-    public static final String ORDER_SALES_PRODUCT_TOTAL = "total";
 
     @SuppressLint("SimpleDateFormat")
     public static String currentDate() throws ParseException {
