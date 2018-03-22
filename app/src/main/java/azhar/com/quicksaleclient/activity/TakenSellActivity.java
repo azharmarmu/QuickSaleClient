@@ -105,8 +105,8 @@ public class TakenSellActivity extends AppCompatActivity {
         customerName.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-                customerGst.setText(custGST.get(position));
-                customerAddress.setText(custAddress.get(position));
+                customerGst.setText(custGST.get(custName.indexOf(customerName.getText().toString())));
+                customerAddress.setText(custAddress.get(custName.indexOf(customerName.getText().toString())));
             }
         });
     }

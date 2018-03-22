@@ -29,7 +29,6 @@ import azhar.com.quicksaleclient.listeners.DateListener;
 import azhar.com.quicksaleclient.model.TakenModel;
 import azhar.com.quicksaleclient.utils.Constants;
 import azhar.com.quicksaleclient.utils.DateUtils;
-import azhar.com.quicksaleclient.utils.DialogUtils;
 import azhar.com.quicksaleclient.utils.Persistance;
 
 /**
@@ -71,7 +70,6 @@ public class Taken implements DateListener {
     }
 
     private void changeMapToList(String pickedDate) {
-        DialogUtils.showProgressDialog(activity, activity.getString(R.string.loading));
         FirebaseFirestore.getInstance()
                 .collection(Constants.TAKEN)
                 .whereEqualTo(Constants.TAKEN_DATE, pickedDate)
@@ -82,7 +80,7 @@ public class Taken implements DateListener {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot value,
                                         @Nullable FirebaseFirestoreException e) {
-                        DialogUtils.dismissProgressDialog();
+
                         if (e != null) {
                             Log.w("Error", "Listen failed.", e);
                             return;

@@ -164,7 +164,7 @@ public class PrintActivity extends AppCompatActivity {
         date.append(soldOrders.get(Constants.BILL_DATE).toString());
         HashMap<String, Object> customer = (HashMap<String, Object>) soldOrders.get(Constants.BILL_CUSTOMER);
         custName.append(customer.get(Constants.CUSTOMER_NAME).toString());
-        if (soldOrders.containsKey(Constants.CUSTOMER_GST)) {
+        if (customer.containsKey(Constants.CUSTOMER_GST)) {
             custGST.append(customer.get(Constants.CUSTOMER_GST).toString());
         } else {
             custGST.append(getString(R.string.nil));

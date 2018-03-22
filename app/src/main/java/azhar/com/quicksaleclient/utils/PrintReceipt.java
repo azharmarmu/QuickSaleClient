@@ -16,9 +16,9 @@ import azhar.com.quicksaleclient.activity.PrintActivity;
 @SuppressWarnings("unchecked")
 public class PrintReceipt {
 
-    public static boolean printBill(Context context, HashMap<String, Object> soldOrders, Bitmap bitmap) {
+    public static void printBill(Context context, HashMap<String, Object> soldOrders, Bitmap bitmap) {
         if (PrintActivity.BLUETOOTH_PRINTER.IsNoConnection()) {
-            return false;
+            return;
         }
 
         //normal font 0x00
@@ -55,8 +55,8 @@ public class PrintReceipt {
 
         PrintActivity.BLUETOOTH_PRINTER.SetAlignMode((byte) 0);
         int paperTotal = 21;
-        PrintActivity.BLUETOOTH_PRINTER.BT_Write("Bill No: " + soldOrders.get("bill_no"));
-        int billLength = 9 + soldOrders.get("bill_no").toString().length();
+        PrintActivity.BLUETOOTH_PRINTER.BT_Write("Bill No: " + soldOrders.get(Constants.BILL_NO));
+        int billLength = 9 + soldOrders.get(Constants.BILL_NO).toString().length();
         paperTotal = paperTotal - billLength;
 
         while (paperTotal >= 0) {
@@ -64,20 +64,21 @@ public class PrintReceipt {
             paperTotal--;
         }
 
-        PrintActivity.BLUETOOTH_PRINTER.BT_Write(String.valueOf(soldOrders.get("sold_date")));
+        PrintActivity.BLUETOOTH_PRINTER.BT_Write(String.valueOf(soldOrders.get(Constants.BILL_DATE)));
 
         PrintActivity.BLUETOOTH_PRINTER.BT_Write(context.getResources().getString(R.string.print_cust));
 
+        HashMap<String, Object> customer = (HashMap<String, Object>) soldOrders.get(Constants.BILL_CUSTOMER);
         PrintActivity.BLUETOOTH_PRINTER.SetAlignMode((byte) 0);
-        PrintActivity.BLUETOOTH_PRINTER.BT_Write("\nName    : " + soldOrders.get("customer_name"));
+        PrintActivity.BLUETOOTH_PRINTER.BT_Write("\nName    : " + customer.get(Constants.CUSTOMER_NAME));
 
-        if (soldOrders.containsKey("customer_gst"))
-            PrintActivity.BLUETOOTH_PRINTER.BT_Write("\nGSTIN   : " + soldOrders.get("customer_gst"));
+        if (customer.containsKey(Constants.CUSTOMER_GST))
+            PrintActivity.BLUETOOTH_PRINTER.BT_Write("\nGSTIN   : " + customer.get(Constants.CUSTOMER_GST));
         else
             PrintActivity.BLUETOOTH_PRINTER.BT_Write("\nGSTIN   : " + "Un-reg");
 
-        if (soldOrders.containsKey("customer_address"))
-            PrintActivity.BLUETOOTH_PRINTER.BT_Write("\nAddress : " + soldOrders.get("customer_address"));
+        if (customer.containsKey(Constants.CUSTOMER_ADDRESS))
+            PrintActivity.BLUETOOTH_PRINTER.BT_Write("\nAddress : " + customer.get(Constants.CUSTOMER_ADDRESS));
         else
             PrintActivity.BLUETOOTH_PRINTER.BT_Write("\nAddress : Bangalore");
 
@@ -97,57 +98,57 @@ public class PrintReceipt {
         PrintActivity.BLUETOOTH_PRINTER.BT_Write("  Total\n");
         PrintActivity.BLUETOOTH_PRINTER.BT_Write(context.getResources().getString(R.string.print_line));
 
-        HashMap<String, Object> productQTY = (HashMap<String, Object>) soldOrders.get("sold_items");
-        HashMap<String, Object> productRate = (HashMap<String, Object>) soldOrders.get("sold_items_rate");
-        HashMap<String, Object> productHSN = (HashMap<String, Object>) soldOrders.get("sold_items_hsn");
-        HashMap<String, Object> productTotal = (HashMap<String, Object>) soldOrders.get("sold_items_total");
+        HashMap<String, Object> items = (HashMap<String, Object>) soldOrders.get(Constants.BILL_SALES);
 
+        for (String prodKey : items.keySet()) {
 
-        for (String prodKey : productQTY.keySet()) {
+            HashMap<String, Object> itemsDetails = (HashMap<String, Object>) items.get(prodKey);
 
             int wholeTotalLength = 5;
             int itemLength = prodKey.length();
             int remLength = wholeTotalLength - itemLength;
-            PrintActivity.BLUETOOTH_PRINTER.BT_Write("\n" + prodKey + "(" + productHSN.get(prodKey) + ")");
+            PrintActivity.BLUETOOTH_PRINTER.BT_Write("\n"
+                    + itemsDetails.get(Constants.PRODUCT_NAME)
+                    + "(" + itemsDetails.get(Constants.PRODUCT_HSN) + ")");
             while (remLength >= 0) {
                 PrintActivity.BLUETOOTH_PRINTER.BT_Write(" ");
                 remLength--;
             }
 
+
             wholeTotalLength = 4;
-            int priceLength = productRate.get(prodKey).toString().length();
+            int priceLength = itemsDetails.get(Constants.PRODUCT_RATE).toString().length();
             remLength = wholeTotalLength - priceLength;
             while (remLength >= 0) {
                 PrintActivity.BLUETOOTH_PRINTER.BT_Write(" ");
                 remLength--;
             }
-            PrintActivity.BLUETOOTH_PRINTER.BT_Write(productRate.get(prodKey).toString());
+            PrintActivity.BLUETOOTH_PRINTER.BT_Write(itemsDetails.get(Constants.PRODUCT_RATE).toString());
 
             wholeTotalLength = 4;
-            int qtyLength = productQTY.get(prodKey).toString().length();
+            int qtyLength = itemsDetails.get(Constants.PRODUCT_QTY).toString().length();
             remLength = wholeTotalLength - qtyLength;
             while (remLength >= 0) {
                 PrintActivity.BLUETOOTH_PRINTER.BT_Write(" ");
                 remLength--;
             }
-            PrintActivity.BLUETOOTH_PRINTER.BT_Write(productQTY.get(prodKey).toString());
+            PrintActivity.BLUETOOTH_PRINTER.BT_Write(itemsDetails.get(Constants.PRODUCT_QTY).toString());
 
             wholeTotalLength = 8;
-            int totalLength = productTotal.get(prodKey).toString().length();
+            int totalLength = itemsDetails.get(Constants.PRODUCT_TOTAL).toString().length();
             remLength = wholeTotalLength - totalLength;
             while (remLength >= 0) {
                 PrintActivity.BLUETOOTH_PRINTER.BT_Write(" ");
                 remLength--;
             }
-            PrintActivity.BLUETOOTH_PRINTER.BT_Write(productTotal.get(prodKey).toString());
-
+            PrintActivity.BLUETOOTH_PRINTER.BT_Write(itemsDetails.get(Constants.PRODUCT_TOTAL).toString());
         }
 
         PrintActivity.BLUETOOTH_PRINTER.LF();
         PrintActivity.BLUETOOTH_PRINTER.BT_Write(context.getResources().getString(R.string.print_line));
 
         DecimalFormat dformat = new DecimalFormat("#.##");
-        double netTotal = Double.parseDouble(soldOrders.get("net_total").toString());
+        double netTotal = Double.parseDouble(soldOrders.get(Constants.BILL_NET_TOTAL).toString());
         netTotal = Double.valueOf(dformat.format(netTotal));
         double grossTotal = Double.valueOf(dformat.format(netTotal / 1.05));
         double gst = Double.valueOf(dformat.format((netTotal - Math.round(grossTotal)) / 2));
@@ -214,8 +215,7 @@ public class PrintReceipt {
         PrintActivity.BLUETOOTH_PRINTER.BT_Write("\n* Thank You *\n");
 
 
-        PrintActivity.BLUETOOTH_PRINTER.LF();
-        PrintActivity.BLUETOOTH_PRINTER.LF();
-        return true;
+
+        PrintActivity.BLUETOOTH_PRINTER.BT_Write("\n\n\n");
     }
 }

@@ -177,8 +177,6 @@ public class LoginActivity extends AppCompatActivity
 
                         phoneVerificationID = verificationId;
                     }
-
-
                 });
     }
 
